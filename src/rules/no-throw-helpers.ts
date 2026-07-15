@@ -6,7 +6,7 @@ type FunctionNode =
   | TSESTree.FunctionDeclaration
   | TSESTree.FunctionExpression;
 
-export default createRule({
+export const rule = createRule({
   name: 'no-throw-helpers',
   meta: {
     type: 'suggestion',

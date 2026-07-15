@@ -1,5 +1,5 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import rule from '../../src/rules/service-shape.js';
+import { rule } from '../../src/rules/service-shape.js';
 
 const ruleTester = new RuleTester();
 

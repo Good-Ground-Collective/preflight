@@ -8,28 +8,12 @@ import { createRule } from '../utils.js';
  * `create()` instead of living in `defaultOptions`: `RuleCreator`'s
  * `applyDefault` replaces array options wholesale).
  */
-const DEFAULT_ALLOWED_SUFFIXES = ['Schema', 'Validator'];
+const defaultAllowedSuffixes = ['Schema', 'Validator'];
 
 type Options = [{ allowedSuffixes?: string[] }];
 type MessageIds = 'looseFunction' | 'looseAnonymousFunction';
 
-/** Is `node` a direct child of `Program`, or one export wrapper away from it? */
-function isModuleLevel(node: TSESTree.Node): boolean {
-  const parent = node.parent;
-  if (parent == null) {
-    return false;
-  }
-  if (parent.type === AST_NODE_TYPES.Program) {
-    return true;
-  }
-  return (
-    (parent.type === AST_NODE_TYPES.ExportNamedDeclaration ||
-      parent.type === AST_NODE_TYPES.ExportDefaultDeclaration) &&
-    parent.parent.type === AST_NODE_TYPES.Program
-  );
-}
-
-export default createRule<Options, MessageIds>({
+export const rule = createRule<Options, MessageIds>({
   name: 'no-loose-functions',
   meta: {
     type: 'suggestion',
@@ -60,7 +44,23 @@ export default createRule<Options, MessageIds>({
   },
   defaultOptions: [{ allowedSuffixes: [] }],
   create(context, [{ allowedSuffixes = [] }]) {
-    const suffixes = [...DEFAULT_ALLOWED_SUFFIXES, ...allowedSuffixes];
+    const suffixes = [...defaultAllowedSuffixes, ...allowedSuffixes];
+
+    /** Is `node` a direct child of `Program`, or one export wrapper away from it? */
+    function isModuleLevel(node: TSESTree.Node): boolean {
+      const parent = node.parent;
+      if (parent == null) {
+        return false;
+      }
+      if (parent.type === AST_NODE_TYPES.Program) {
+        return true;
+      }
+      return (
+        (parent.type === AST_NODE_TYPES.ExportNamedDeclaration ||
+          parent.type === AST_NODE_TYPES.ExportDefaultDeclaration) &&
+        parent.parent.type === AST_NODE_TYPES.Program
+      );
+    }
 
     function isAllowed(name: string | null): boolean {
       return name != null && suffixes.some((suffix) => name.endsWith(suffix));

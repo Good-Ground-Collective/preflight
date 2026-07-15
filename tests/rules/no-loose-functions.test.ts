@@ -1,5 +1,5 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import rule from '../../src/rules/no-loose-functions.js';
+import { rule } from '../../src/rules/no-loose-functions.js';
 
 const ruleTester = new RuleTester();
 

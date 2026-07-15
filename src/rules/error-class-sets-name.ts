@@ -3,40 +3,7 @@ import { createRule } from '../utils.js';
 
 type ClassNode = TSESTree.ClassDeclaration | TSESTree.ClassExpression;
 
-/**
- * `name` counts as set when the class body has a non-static, non-computed
- * `name` property definition, or the constructor contains a top-level
- * `this.name = …` assignment. Deliberately shallow — a heuristic, not a
- * data-flow analysis — which is acceptable for lint.
- */
-function setsName(cls: ClassNode): boolean {
-  return cls.body.body.some((member) => {
-    if (
-      member.type === 'PropertyDefinition' &&
-      !member.static &&
-      !member.computed &&
-      member.key.type === 'Identifier' &&
-      member.key.name === 'name'
-    ) {
-      return true;
-    }
-    if (member.type === 'MethodDefinition' && member.kind === 'constructor') {
-      return (member.value.body?.body ?? []).some(
-        (statement) =>
-          statement.type === 'ExpressionStatement' &&
-          statement.expression.type === 'AssignmentExpression' &&
-          statement.expression.left.type === 'MemberExpression' &&
-          statement.expression.left.object.type === 'ThisExpression' &&
-          !statement.expression.left.computed &&
-          statement.expression.left.property.type === 'Identifier' &&
-          statement.expression.left.property.name === 'name',
-      );
-    }
-    return false;
-  });
-}
-
-export default createRule({
+export const rule = createRule({
   name: 'error-class-sets-name',
   meta: {
     type: 'problem',
@@ -54,6 +21,39 @@ export default createRule({
   defaultOptions: [],
   create(context) {
     const { sourceCode } = context;
+
+    /**
+     * `name` counts as set when the class body has a non-static, non-computed
+     * `name` property definition, or the constructor contains a top-level
+     * `this.name = …` assignment. Deliberately shallow — a heuristic, not a
+     * data-flow analysis — which is acceptable for lint.
+     */
+    function setsName(cls: ClassNode): boolean {
+      return cls.body.body.some((member) => {
+        if (
+          member.type === 'PropertyDefinition' &&
+          !member.static &&
+          !member.computed &&
+          member.key.type === 'Identifier' &&
+          member.key.name === 'name'
+        ) {
+          return true;
+        }
+        if (member.type === 'MethodDefinition' && member.kind === 'constructor') {
+          return (member.value.body?.body ?? []).some(
+            (statement) =>
+              statement.type === 'ExpressionStatement' &&
+              statement.expression.type === 'AssignmentExpression' &&
+              statement.expression.left.type === 'MemberExpression' &&
+              statement.expression.left.object.type === 'ThisExpression' &&
+              !statement.expression.left.computed &&
+              statement.expression.left.property.type === 'Identifier' &&
+              statement.expression.left.property.name === 'name',
+          );
+        }
+        return false;
+      });
+    }
 
     function checkClass(node: ClassNode): void {
       const superClass = node.superClass;
@@ -93,8 +93,12 @@ export default createRule({
     }
 
     return {
-      ClassDeclaration: checkClass,
-      ClassExpression: checkClass,
+      ClassDeclaration(node): void {
+        checkClass(node);
+      },
+      ClassExpression(node): void {
+        checkClass(node);
+      },
     };
   },
 });
