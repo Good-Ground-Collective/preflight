@@ -2,72 +2,15 @@ import type { TSESTree } from '@typescript-eslint/utils';
 import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 import { createRule } from '../utils.js';
 
-const DEFAULT_NAME = /^default[A-Z]\w*$/u;
-const FACTORY_NAME = /^create[A-Z]\w*$/u;
+const defaultBindingName = /^default[A-Z]\w*$/u;
+const factoryName = /^create[A-Z]\w*$/u;
 
 type FunctionNode =
   | TSESTree.ArrowFunctionExpression
   | TSESTree.FunctionDeclaration
   | TSESTree.FunctionExpression;
 
-/** Strips `as` / `satisfies` wrappers so the underlying expression can be classified. */
-function unwrapAssertions(expression: TSESTree.Expression): TSESTree.Expression {
-  let current = expression;
-  while (
-    current.type === AST_NODE_TYPES.TSAsExpression ||
-    current.type === AST_NODE_TYPES.TSSatisfiesExpression
-  ) {
-    current = current.expression;
-  }
-  return current;
-}
-
-/** Returns the interface-candidate name referenced by a written annotation, if any. */
-function referencedTypeName(typeNode: TSESTree.TypeNode | undefined): string | null {
-  if (
-    typeNode?.type === AST_NODE_TYPES.TSTypeReference &&
-    typeNode.typeName.type === AST_NODE_TYPES.Identifier
-  ) {
-    return typeNode.typeName.name;
-  }
-  return null;
-}
-
-/** Collects the `return` statements belonging to `fn` itself, skipping nested functions. */
-function collectOwnReturns(fn: FunctionNode): TSESTree.ReturnStatement[] {
-  const returns: TSESTree.ReturnStatement[] = [];
-  const visit = (node: TSESTree.Node): void => {
-    if (node.type === AST_NODE_TYPES.ReturnStatement) {
-      returns.push(node);
-      return;
-    }
-    if (
-      node !== fn &&
-      (node.type === AST_NODE_TYPES.FunctionDeclaration ||
-        node.type === AST_NODE_TYPES.FunctionExpression ||
-        node.type === AST_NODE_TYPES.ArrowFunctionExpression)
-    ) {
-      return; // returns inside nested functions are not the factory's returns
-    }
-    for (const key of Object.keys(node)) {
-      if (key === 'parent') continue;
-      const value = (node as unknown as Record<string, unknown>)[key];
-      for (const child of Array.isArray(value) ? value : [value]) {
-        if (
-          child !== null &&
-          typeof child === 'object' &&
-          typeof (child as { type?: unknown }).type === 'string'
-        ) {
-          visit(child as TSESTree.Node);
-        }
-      }
-    }
-  };
-  visit(fn.body);
-  return returns;
-}
-
-export default createRule({
+export const rule = createRule({
   name: 'service-shape',
   meta: {
     type: 'suggestion',
@@ -87,8 +30,65 @@ export default createRule({
   create(context) {
     const localInterfaces = new Set<string>();
 
+    /** Strips `as` / `satisfies` wrappers so the underlying expression can be classified. */
+    function unwrapAssertions(expression: TSESTree.Expression): TSESTree.Expression {
+      let current = expression;
+      while (
+        current.type === AST_NODE_TYPES.TSAsExpression ||
+        current.type === AST_NODE_TYPES.TSSatisfiesExpression
+      ) {
+        current = current.expression;
+      }
+      return current;
+    }
+
+    /** Returns the interface-candidate name referenced by a written annotation, if any. */
+    function referencedTypeName(typeNode: TSESTree.TypeNode | undefined): string | null {
+      if (
+        typeNode?.type === AST_NODE_TYPES.TSTypeReference &&
+        typeNode.typeName.type === AST_NODE_TYPES.Identifier
+      ) {
+        return typeNode.typeName.name;
+      }
+      return null;
+    }
+
+    /** Collects the `return` statements belonging to `fn` itself, skipping nested functions. */
+    function collectOwnReturns(fn: FunctionNode): TSESTree.ReturnStatement[] {
+      const returns: TSESTree.ReturnStatement[] = [];
+      const visit = (node: TSESTree.Node): void => {
+        if (node.type === AST_NODE_TYPES.ReturnStatement) {
+          returns.push(node);
+          return;
+        }
+        if (
+          node !== fn &&
+          (node.type === AST_NODE_TYPES.FunctionDeclaration ||
+            node.type === AST_NODE_TYPES.FunctionExpression ||
+            node.type === AST_NODE_TYPES.ArrowFunctionExpression)
+        ) {
+          return; // returns inside nested functions are not the factory's returns
+        }
+        for (const key of Object.keys(node)) {
+          if (key === 'parent') continue;
+          const value = (node as unknown as Record<string, unknown>)[key];
+          for (const child of Array.isArray(value) ? value : [value]) {
+            if (
+              child !== null &&
+              typeof child === 'object' &&
+              typeof (child as { type?: unknown }).type === 'string'
+            ) {
+              visit(child as TSESTree.Node);
+            }
+          }
+        }
+      };
+      visit(fn.body);
+      return returns;
+    }
+
     function checkDefaultBinding(node: TSESTree.VariableDeclarator): void {
-      if (node.id.type !== AST_NODE_TYPES.Identifier || !DEFAULT_NAME.test(node.id.name)) {
+      if (node.id.type !== AST_NODE_TYPES.Identifier || !defaultBindingName.test(node.id.name)) {
         return;
       }
       if (!node.init) return;
@@ -157,7 +157,7 @@ export default createRule({
     }
 
     function checkFactory(fn: FunctionNode, name: string): void {
-      if (!FACTORY_NAME.test(name)) return;
+      if (!factoryName.test(name)) return;
 
       const returned: TSESTree.Expression[] =
         fn.body.type !== AST_NODE_TYPES.BlockStatement

@@ -6,7 +6,7 @@ import { createRule } from '../utils.js';
  * Statement types a comment may legitimately sit on top of: the paragraph is
  * documentation for the declaration, so JSDoc conventions apply instead.
  */
-const DECLARATION_TYPES: ReadonlySet<AST_NODE_TYPES> = new Set([
+const declarationTypes: ReadonlySet<AST_NODE_TYPES> = new Set([
   AST_NODE_TYPES.FunctionDeclaration,
   AST_NODE_TYPES.ClassDeclaration,
   AST_NODE_TYPES.VariableDeclaration,
@@ -21,7 +21,7 @@ const DECLARATION_TYPES: ReadonlySet<AST_NODE_TYPES> = new Set([
 /** A paragraph: one Block comment, or a run of adjacent Line comments. */
 type Paragraph = TSESTree.Comment[];
 
-export default createRule({
+export const rule = createRule({
   name: 'no-paragraph-comments',
   meta: {
     type: 'suggestion',
@@ -118,8 +118,7 @@ export default createRule({
           const last = paragraph.at(-1)!;
 
           if (last.range[0] < fileTopBoundary) {
-            // (a) File top: only runs of 2+ line comments are paragraphs;
-            // single comments and block headers (license etc.) are exempt.
+            // File top: only 2+ line runs are paragraphs; single comments and block headers (license etc.) are exempt.
             if (paragraph.length >= 2) {
               report(paragraph, 'fileTopRun');
             }
@@ -145,7 +144,7 @@ export default createRule({
           const attached =
             next.loc.start.line - last.loc.end.line <= 1 &&
             statement !== null &&
-            DECLARATION_TYPES.has(statement.type);
+            declarationTypes.has(statement.type);
           if (!attached) {
             report(paragraph, 'floatingParagraph');
           }

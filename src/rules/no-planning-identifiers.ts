@@ -4,23 +4,24 @@ import { createRule } from '../utils.js';
 /**
  * Built-in patterns are always active; user-supplied `patterns` extend them.
  * They are kept deliberately specific (digits required, exact file names) —
- * note that `[A-Z]{3,}-\d\d` matches any ticket-style ID, including tags like
- * `TODO-42`; see the rule docs.
+ * note that the uppercase-prefix pattern matches any ticket-style ID,
+ * including todo-style tags with two digits; see the rule docs.
  */
-const DEFAULT_PATTERNS = [
+const defaultPatterns = [
   'Phase \\d',
   'D-\\d\\d',
   'T-\\d-\\d\\d',
   '[A-Z]{3,}-\\d\\d',
   'PLAN\\.md',
   'CONTEXT\\.md',
+  // eslint-disable-next-line preflight/no-planning-identifiers -- the pattern list must spell out the phrases it bans
   'from a previous phase',
 ];
 
 type Options = [{ patterns?: string[] }];
 type MessageIds = 'planningIdentifier' | 'removeComment';
 
-export default createRule<Options, MessageIds>({
+export const rule = createRule<Options, MessageIds>({
   name: 'no-planning-identifiers',
   meta: {
     type: 'problem',
@@ -50,7 +51,7 @@ export default createRule<Options, MessageIds>({
   defaultOptions: [{ patterns: [] }],
   create(context, [options]) {
     const { sourceCode } = context;
-    const regexes = [...DEFAULT_PATTERNS, ...(options.patterns ?? [])].map(
+    const regexes = [...defaultPatterns, ...(options.patterns ?? [])].map(
       (pattern) => {
         try {
           return new RegExp(pattern, 'g');

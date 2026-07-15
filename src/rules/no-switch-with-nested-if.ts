@@ -7,7 +7,7 @@ import { createRule } from '../utils.js';
  * one block-statement deep inside it. Deeper structures (loop bodies, `try`
  * blocks, callbacks) are deliberately left alone.
  */
-export default createRule({
+export const rule = createRule({
   name: 'no-switch-with-nested-if',
   meta: {
     type: 'suggestion',

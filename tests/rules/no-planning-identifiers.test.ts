@@ -1,5 +1,5 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import rule from '../../src/rules/no-planning-identifiers.js';
+import { rule } from '../../src/rules/no-planning-identifiers.js';
 
 const ruleTester = new RuleTester();
 
