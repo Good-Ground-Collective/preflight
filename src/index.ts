@@ -14,7 +14,9 @@ const plugin: ESLint.Plugin = {
     version: pkg.version,
     namespace: 'preflight',
   },
-  rules: { ...rules },
+  // TSESLint's RuleModule type is structurally incompatible with ESLint core's
+  // RuleDefinition (richer context type), but is runtime-compatible.
+  rules: { ...rules } as unknown as ESLint.Plugin['rules'],
   configs: {},
 };
 
