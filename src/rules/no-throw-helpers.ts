@@ -27,12 +27,15 @@ export const rule = createRule({
         node: FunctionNode,
       ) {
         const body = node.body;
-        if (
-          body &&
-          body.type === 'BlockStatement' &&
-          body.body.length === 1 &&
-          body.body[0]?.type === 'ThrowStatement'
-        ) {
+        if (!body || body.type !== 'BlockStatement') {
+          return;
+        }
+        // Ignore stray empty statements (`;`) so they can't smuggle a
+        // single-throw body past the length check.
+        const statements = body.body.filter(
+          (statement) => statement.type !== 'EmptyStatement',
+        );
+        if (statements.length === 1 && statements[0]?.type === 'ThrowStatement') {
           context.report({ node, messageId: 'throwHelper' });
         }
       },
