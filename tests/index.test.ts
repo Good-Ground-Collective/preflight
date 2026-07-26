@@ -9,7 +9,7 @@ const pkg = JSON.parse(
 describe('plugin object', () => {
   it('exposes meta read from package.json', () => {
     expect(plugin.meta).toEqual({
-      name: 'eslint-plugin-preflight',
+      name: pkg.name,
       version: pkg.version,
       namespace: 'preflight',
     });

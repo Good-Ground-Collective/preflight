@@ -66,6 +66,8 @@ function assertPositive(n: number) {
   later if it proves too noisy.
 - A directive prologue (`'use strict';`) followed by a throw is two statements
   and is therefore not flagged.
+- Stray empty statements (a leading or trailing `;`) are ignored, so
+  `function fail() { throw new Error();; }` is still flagged.
 - A throw wrapped in a nested block (`function f() { { throw x; } }`) is not
   flagged; the outer body's single statement is a block, not a throw.
 

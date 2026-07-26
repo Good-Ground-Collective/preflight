@@ -102,5 +102,22 @@ ruleTester.run('no-throw-helpers', rule, {
         },
       ],
     },
+    {
+      // A stray trailing empty statement (`;`) must not smuggle a throw helper past the rule.
+      code: 'function fail() { throw new Error();; }',
+      errors: [
+        { messageId: 'throwHelper', type: AST_NODE_TYPES.FunctionDeclaration },
+      ],
+    },
+    {
+      // Leading empty statement is likewise ignored.
+      code: 'const boom = () => { ; throw new Error(); };',
+      errors: [
+        {
+          messageId: 'throwHelper',
+          type: AST_NODE_TYPES.ArrowFunctionExpression,
+        },
+      ],
+    },
   ],
 });

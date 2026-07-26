@@ -1,9 +1,12 @@
 {
-  "name": "eslint-plugin-preflight",
+  "name": "@good-ground-collective/preflight",
   "version": "0.1.0",
   "description": "ESLint plugin enforcing the coding charter — nit-level review feedback, caught before the PR",
   "type": "module",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/good-ground-collective/preflight.git"
@@ -62,6 +65,7 @@
     "eslint-plugin-import-x": "^4.17.1",
     "eslint-plugin-unicorn": "^72.0.0",
     "jiti": "^2.7.0",
+    "semantic-release": "^25.0.8",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.64.0",
