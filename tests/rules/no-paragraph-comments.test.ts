@@ -1,5 +1,5 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import rule from '../../src/rules/no-paragraph-comments.js';
+import { rule } from '../../src/rules/no-paragraph-comments.js';
 
 // Two valid fixtures carry inert eslint-* directives (RuleTester only runs
 // this rule), so unused-directive reporting must be off for this tester.

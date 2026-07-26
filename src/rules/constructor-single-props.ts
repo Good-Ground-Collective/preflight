@@ -7,7 +7,7 @@ import { createRule } from '../utils.js';
  * count as ordinary parameters, so `params.length` is the whole check.
  * Recommended-only; too heuristic for the blocking gate.
  */
-export default createRule({
+export const rule = createRule({
   name: 'constructor-single-props',
   meta: {
     type: 'problem',

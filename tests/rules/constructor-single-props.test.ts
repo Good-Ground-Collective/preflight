@@ -1,5 +1,5 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import rule from '../../src/rules/constructor-single-props.js';
+import { rule } from '../../src/rules/constructor-single-props.js';
 
 const ruleTester = new RuleTester();
 

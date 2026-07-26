@@ -1,5 +1,5 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import rule from '../../src/rules/error-class-sets-name.js';
+import { rule } from '../../src/rules/error-class-sets-name.js';
 
 const ruleTester = new RuleTester();
 

@@ -1,6 +1,6 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { AST_NODE_TYPES } from '@typescript-eslint/utils';
-import rule from '../../src/rules/no-switch-with-nested-if.js';
+import { rule } from '../../src/rules/no-switch-with-nested-if.js';
 
 const ruleTester = new RuleTester();
 
