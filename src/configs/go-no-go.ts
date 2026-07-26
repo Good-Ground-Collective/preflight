@@ -2,6 +2,7 @@ import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import unicorn from 'eslint-plugin-unicorn';
 import type { ESLint, Linter } from 'eslint';
+import { typeLikeValueFilter } from '../conventions.js';
 
 /**
  * Deterministic blocking gate: every rule in here is an `error`, and the set
@@ -60,6 +61,13 @@ export const goNoGoBuilder = {
             format: ['UPPER_CASE'],
             prefix: ['NULL_', 'UNKNOWN_'],
           },
+          // Schema/Validator bindings are type-like values, so PascalCase reads correctly; the suffixes are the ones no-loose-functions exempts.
+          {
+            selector: 'variable',
+            modifiers: ['const'],
+            filter: { regex: typeLikeValueFilter, match: true },
+            format: ['camelCase', 'PascalCase'],
+          },
           {
             selector: 'variableLike',
             format: ['camelCase'],
@@ -71,6 +79,17 @@ export const goNoGoBuilder = {
             selector: 'classProperty',
             modifiers: ['static'],
             format: ['UPPER_CASE'],
+          },
+          // Class state is ours to name, so it stays hard-scoped even though object-literal keys below do not.
+          {
+            selector: 'classProperty',
+            format: ['camelCase'],
+            leadingUnderscore: 'allow',
+          },
+          {
+            selector: 'parameterProperty',
+            format: ['camelCase'],
+            leadingUnderscore: 'allow',
           },
           // M-3: no I-prefix on interfaces.
           {
@@ -84,8 +103,12 @@ export const goNoGoBuilder = {
             modifiers: ['requiresQuotes'],
             format: null,
           },
-          // M-7: camelCase object-literal keys.
-          { selector: 'objectLiteralProperty', format: ['camelCase'] },
+          // Object keys carry wire formats (`issue_number`, `Authorization`, `JIRA_HOST`) whose casing a third party chose, so every deliberate case passes and only mixed-case typos fail.
+          {
+            selector: 'objectLiteralProperty',
+            format: ['camelCase', 'PascalCase', 'snake_case', 'UPPER_CASE'],
+            leadingUnderscore: 'allow',
+          },
         ],
         'unicorn/filename-case': ['error', { case: 'kebabCase' }],
       },

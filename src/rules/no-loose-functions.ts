@@ -1,6 +1,7 @@
 import type { TSESTree } from '@typescript-eslint/utils';
 import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 import { createRule } from '../utils.js';
+import { typeLikeValueSuffixes } from '../conventions.js';
 
 /**
  * Always-active suffixes. User-supplied `allowedSuffixes` extend this list —
@@ -8,7 +9,7 @@ import { createRule } from '../utils.js';
  * `create()` instead of living in `defaultOptions`: `RuleCreator`'s
  * `applyDefault` replaces array options wholesale).
  */
-const defaultAllowedSuffixes = ['Schema', 'Validator'];
+const defaultAllowedSuffixes = typeLikeValueSuffixes;
 
 type Options = [{ allowedSuffixes?: string[] }];
 type MessageIds = 'looseFunction' | 'looseAnonymousFunction';

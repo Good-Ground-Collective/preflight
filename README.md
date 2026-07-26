@@ -193,6 +193,35 @@ function createFoo() { return { do() {} }; } // ✗
 
 Beyond the `preflight/` rules, both shared configs turn on a few third-party rules: `@typescript-eslint/member-ordering`, `@typescript-eslint/naming-convention`, and `unicorn/filename-case` in `go-no-go`, plus `@typescript-eslint/consistent-type-imports`, `@typescript-eslint/no-explicit-any`, and `import-x/no-default-export` in `recommended`. See the config source for the exact settings.
 
+#### Naming
+
+`@typescript-eslint/naming-convention` draws one line: **names you choose** are enforced, **names a third party chose** are not.
+
+| What | Required |
+| --- | --- |
+| Static class properties | `UPPER_CASE` |
+| Instance class properties, parameter properties | `camelCase` (leading `_` allowed) |
+| Variables, parameters, functions | `camelCase` |
+| `NULL_`/`UNKNOWN_` null-object constants | `UPPER_CASE` |
+| `const` bindings ending `Schema` or `Validator` | `camelCase` **or** `PascalCase` |
+| Types, interfaces, enums | `PascalCase` (no `I` prefix) |
+| Object-literal keys | any deliberate case |
+
+The `Schema`/`Validator` allowance uses the same suffix list that exempts a binding from [`no-loose-functions`](#no-loose-functions), so `export const UserSchema = z.object({})` satisfies both rules. The two are built from one constant, not kept in step by hand.
+
+**Object-literal keys** accept `camelCase`, `PascalCase`, `snake_case` and `UPPER_CASE`. Keys are overwhelmingly a wire format rather than a name — `issue_number` is Octokit's spelling, `Authorization` is the HTTP header, `JIRA_HOST` is the env var — and the previous `camelCase` mandate enforced casing on exactly the half of a contract that happened to be identifier-safe:
+
+```ts
+const HEADING_KEYS: Record<string, SectionKey> = {
+  'Problem Statement': 'problemStatement',   // exempt: requires quotes
+  Solution: 'solution',                      // was an error
+};
+```
+
+Only a key in no deliberate case at all (`issue_Number`) still fails. Class properties are unaffected — `class A { issue_number = 1 }` is still an error, because class state is yours to name.
+
+Members of `interface`/`type` declarations are not checked, for the same reason: they routinely mirror an API response shape.
+
 ## Registry auth
 
 GitHub Packages requires a token to install. Add these two lines to `.npmrc` — both are safe to commit, since `${GITHUB_TOKEN}` is an env-var reference that npm expands at read time, not your actual token:
