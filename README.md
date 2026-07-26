@@ -72,7 +72,126 @@ export default [
 ];
 ```
 
-Rule docs live in [`docs/rules`](./docs/rules).
+## Rules
+
+Every rule is prefixed `preflight/` and is a pure AST check (no type information required). The **Set** column tells you where each rule lives:
+
+- **go-no-go** — in the blocking `go-no-go` gate, and therefore also in `recommended`.
+- **recommended** — added by `recommended` only; heuristic or fuzzier, so it's kept out of the blocking gate.
+
+| Rule | Set | What it does |
+| --- | --- | --- |
+| [`error-class-sets-name`](#error-class-sets-name) | go-no-go | `Error` subclasses must set `name`. |
+| [`no-loose-functions`](#no-loose-functions) | go-no-go | No module-level functions. |
+| [`no-paragraph-comments`](#no-paragraph-comments) | go-no-go | No narrative comment blocks. |
+| [`no-planning-identifiers`](#no-planning-identifiers) | go-no-go | No planning-system IDs in comments/strings. |
+| [`no-switch-with-nested-if`](#no-switch-with-nested-if) | go-no-go | No `if` nested directly inside a `switch` case. |
+| [`no-throw-helpers`](#no-throw-helpers) | go-no-go | No functions whose whole body is a `throw`. |
+| [`constructor-single-props`](#constructor-single-props) | recommended | Constructors take a single props object. |
+| [`service-shape`](#service-shape) | recommended | Services follow interface → class → singleton. |
+
+### go-no-go rules
+
+The blocking gate — all `error`, chosen to be false-positive-safe. Also included in `recommended`.
+
+#### error-class-sets-name
+
+**Set: go-no-go · autofixable.** Requires `Error` subclasses (any superclass identifier ending in `Error`, e.g. `AppError`) to set `name` — via a `name` property or `this.name = …` in the constructor. Otherwise `err.name`, `toString()`, and stack traces all report the base class, defeating log filtering and name-based checks across serialization boundaries.
+
+```ts
+class TimeoutError extends Error {} // ✗ — errors identify as "Error"
+
+class TimeoutError extends Error {
+  override name = 'TimeoutError'; // ✓
+}
+```
+
+[Full docs →](./docs/rules/error-class-sets-name.md)
+
+#### no-loose-functions
+
+**Set: go-no-go · has options.** Flags module-level `function` declarations (including `export` and `export default` forms) and top-level `const`/`let`/`var` bindings initialized with an arrow or function expression — behavior belongs on a service or class. Bindings whose name ends with an allowlisted suffix are exempt: `Schema` and `Validator` always, plus any you add via the `allowedSuffixes` option. Nested functions and IIFEs are never flagged.
+
+```ts
+const doThing = () => {}; // ✗
+const userSchema = z.object({}); // ✓ — allowlisted suffix
+```
+
+[Full docs →](./docs/rules/no-loose-functions.md)
+
+#### no-paragraph-comments
+
+**Set: go-no-go.** Flags narrative comment blocks: two or more consecutive `//` lines at the top of a file, and paragraph comments (a block comment, or a 2+ line run) floating above non-declaration code. Concepts belong in JSDoc on the declaration they describe. Single why-comments, JSDoc attached to a declaration, license headers, shebangs, and `eslint-*` directives are left alone.
+
+[Full docs →](./docs/rules/no-paragraph-comments.md)
+
+#### no-planning-identifiers
+
+**Set: go-no-go · has options.** Catches planning-system identifiers — `Phase 2`, ticket IDs like `KAN-20`, `PLAN.md`, "from a previous phase" — in comments and strings, where they outlive the systems that gave them meaning. Comment hits get a remove *suggestion* (never auto-applied); string hits are report-only. Extend the built-in patterns with the `patterns` option, and suppress an intentional hit with an `eslint-disable` directive.
+
+```ts
+// resolves D-09 open redirect  ✗
+/* Phase 2: wire the adapters */  // ✗
+```
+
+[Full docs →](./docs/rules/no-planning-identifiers.md)
+
+#### no-switch-with-nested-if
+
+**Set: go-no-go.** Flags an `if` statement that is a direct child of a `switch` case (or one block-statement deep inside it). Once a case needs its own conditional, the branching has outgrown the `switch` — split it into more cases, extract a function, or use a lookup. An `if` inside a deeper structure (loop body, `try`, callback) is left alone.
+
+```ts
+switch (x) {
+  case 1:
+    if (y) doA(); // ✗
+    break;
+}
+```
+
+[Full docs →](./docs/rules/no-switch-with-nested-if.md)
+
+#### no-throw-helpers
+
+**Set: go-no-go.** Bans functions whose entire body is a single `throw` statement — they hide the error type behind an extra call frame and defeat TypeScript's control-flow narrowing at the call site. Throw a named error class inline instead. (Class and object methods count too.)
+
+```ts
+function fail() { throw new AppError(); } // ✗
+if (!user) throw new UserNotFoundError(id); // ✓ — inline at the call site
+```
+
+[Full docs →](./docs/rules/no-throw-helpers.md)
+
+### recommended-only rules
+
+Added by `recommended` on top of the go-no-go set. More heuristic, so they're kept out of the blocking gate.
+
+#### constructor-single-props
+
+**Set: recommended.** Requires constructors to take a single props object, banning the `constructor(config, deps)` split. TypeScript parameter properties each count as one parameter, so the shorthand split is flagged too. Multiple parameters make call sites order-dependent and resist the schema-validation pattern the charter prescribes.
+
+```ts
+class Service {
+  constructor(config: Config, deps: Deps) {} // ✗
+}
+```
+
+[Full docs →](./docs/rules/constructor-single-props.md)
+
+#### service-shape
+
+**Set: recommended.** Enforces the `interface → class → optional singleton` shape for service-shaped concepts. Flags a `default<Name>` binding typed as a same-module interface but initialized with an object literal, and a `create<Name>` factory that returns an object literal or closure instead of a class instance (indirect returns are traced within the factory's own scope).
+
+```ts
+interface Foo { run(): void; }
+const defaultFoo: Foo = { run() {} }; // ✗
+function createFoo() { return { do() {} }; } // ✗
+```
+
+[Full docs →](./docs/rules/service-shape.md)
+
+### Also enforced by the presets
+
+Beyond the `preflight/` rules, both shared configs turn on a few third-party rules: `@typescript-eslint/member-ordering`, `@typescript-eslint/naming-convention`, and `unicorn/filename-case` in `go-no-go`, plus `@typescript-eslint/consistent-type-imports`, `@typescript-eslint/no-explicit-any`, and `import-x/no-default-export` in `recommended`. See the config source for the exact settings.
 
 ## Registry auth
 
