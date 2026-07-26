@@ -33,6 +33,27 @@ ruleTester.run('no-planning-identifiers', rule, {
       code: '// clean comment',
       options: [{ patterns: ['TICKET-\\d+'] }],
     },
+    // A prefix requires the ticket-ID shape — the bare word is prose.
+    {
+      code: '// ACME team standup notes',
+      options: [{ prefixes: ['ACME'] }],
+    },
+    // The hyphen and digits are both required.
+    {
+      code: '// GH- was the old host',
+      options: [{ prefixes: ['GH'] }],
+    },
+    // Regex-special characters in a prefix are matched literally, so the `.`
+    // here cannot act as a wildcard against `AXC-1`.
+    {
+      code: '// AXC-1 is unrelated',
+      options: [{ prefixes: ['A.C'] }],
+    },
+    // A prefix is a whole-word match, not a substring one.
+    {
+      code: '// LIGHT-3 fixtures',
+      options: [{ prefixes: ['GH'] }],
+    },
   ],
   invalid: [
     // Line comment: accurate loc inside the comment + removal suggestion.
@@ -179,6 +200,84 @@ ruleTester.run('no-planning-identifiers', rule, {
     {
       code: "const doc = 'PLAN.md';",
       options: [{ patterns: ['TICKET-\\d+'] }],
+      errors: [
+        {
+          messageId: 'planningIdentifier',
+          data: { match: 'PLAN.md', kind: 'string' },
+          suggestions: [],
+        },
+      ],
+    },
+    // A short prefix the default `[A-Z]{3,}-\d\d` cannot reach: two letters,
+    // one digit.
+    {
+      code: '// GH-7 follow-up',
+      options: [{ prefixes: ['GH'] }],
+      errors: [
+        {
+          messageId: 'planningIdentifier',
+          data: { match: 'GH-7', kind: 'comment' },
+          suggestions: [{ messageId: 'removeComment', output: '' }],
+        },
+      ],
+    },
+    // Lowercase prefixes are another shape the uppercase default misses.
+    {
+      code: '// gh-7 follow-up',
+      options: [{ prefixes: ['gh'] }],
+      errors: [
+        {
+          messageId: 'planningIdentifier',
+          data: { match: 'gh-7', kind: 'comment' },
+          suggestions: [{ messageId: 'removeComment', output: '' }],
+        },
+      ],
+    },
+    // Multi-digit IDs match, unlike the two-digit-exactly defaults.
+    {
+      code: "const note = 'tracked as T-1234';",
+      options: [{ prefixes: ['T'] }],
+      errors: [
+        {
+          messageId: 'planningIdentifier',
+          data: { match: 'T-1234', kind: 'string' },
+          suggestions: [],
+        },
+      ],
+    },
+    // A regex-special character in a prefix matches itself.
+    {
+      code: '// A.C-1 shipped',
+      options: [{ prefixes: ['A.C'] }],
+      errors: [
+        {
+          messageId: 'planningIdentifier',
+          data: { match: 'A.C-1', kind: 'comment' },
+          suggestions: [{ messageId: 'removeComment', output: '' }],
+        },
+      ],
+    },
+    // `prefixes` and `patterns` are both additive and coexist.
+    {
+      code: '// GH-7 then sprint 4',
+      options: [{ prefixes: ['GH'], patterns: ['sprint \\d+'] }],
+      errors: [
+        {
+          messageId: 'planningIdentifier',
+          data: { match: 'GH-7', kind: 'comment' },
+          suggestions: [{ messageId: 'removeComment', output: '' }],
+        },
+        {
+          messageId: 'planningIdentifier',
+          data: { match: 'sprint 4', kind: 'comment' },
+          suggestions: [{ messageId: 'removeComment', output: '' }],
+        },
+      ],
+    },
+    // Defaults stay active when prefixes are supplied.
+    {
+      code: "const doc = 'PLAN.md';",
+      options: [{ prefixes: ['GH'] }],
       errors: [
         {
           messageId: 'planningIdentifier',

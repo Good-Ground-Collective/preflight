@@ -127,12 +127,23 @@ const userSchema = z.object({}); // ✓ — allowlisted suffix
 
 #### no-planning-identifiers
 
-**Set: go-no-go · has options.** Catches planning-system identifiers — `Phase 2`, ticket IDs like `KAN-20`, `PLAN.md`, "from a previous phase" — in comments and strings, where they outlive the systems that gave them meaning. Comment hits get a remove *suggestion* (never auto-applied); string hits are report-only. Extend the built-in patterns with the `patterns` option, and suppress an intentional hit with an `eslint-disable` directive.
+**Set: go-no-go · has options.** Catches planning-system identifiers — `Phase 2`, ticket IDs like `KAN-20`, `PLAN.md`, "from a previous phase" — in comments and strings, where they outlive the systems that gave them meaning. Comment hits get a remove *suggestion* (never auto-applied); string hits are report-only. Suppress an intentional hit with an `eslint-disable` directive.
 
 ```ts
 // resolves D-09 open redirect  ✗
 /* Phase 2: wire the adapters */  // ✗
 ```
+
+Two additive options teach it your team's vocabulary — the built-in patterns always stay active:
+
+```js
+'preflight/no-planning-identifiers': ['error', {
+  prefixes: ['ACME', 'GH'],   // sugar → catches ACME-42, GH-7
+  patterns: ['sprint \\d+'],  // full regex escape hatch
+}],
+```
+
+`prefixes` compiles each entry to `\b<prefix>-\d+\b` with the prefix matched literally. The default `[A-Z]{3,}-\d\d` already catches most uppercase ticket IDs, so `prefixes` is for the shapes it misses — short (`GH-7`, `T-3`) and non-uppercase (`gh-7`) ones.
 
 [Full docs →](./docs/rules/no-planning-identifiers.md)
 
