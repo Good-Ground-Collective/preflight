@@ -4,6 +4,13 @@ import unicorn from 'eslint-plugin-unicorn';
 import type { ESLint, Linter } from 'eslint';
 
 /**
+ * Directory names owned by the tooling ecosystem rather than chosen by the
+ * author. Renaming them breaks test discovery and module mocking, so casing
+ * them is not ours to enforce.
+ */
+const toolingOwnedDirectories = [/^__(tests|mocks|snapshots|fixtures)__$/];
+
+/**
  * Deterministic blocking gate: every rule in here is an `error`, and the set
  * stays free of false-positive-prone rules — a misfire must never block a
  * merge. `build` takes the plugin object as a parameter to sidestep the
@@ -87,7 +94,40 @@ export const goNoGoBuilder = {
           // M-7: camelCase object-literal keys.
           { selector: 'objectLiteralProperty', format: ['camelCase'] },
         ],
-        'unicorn/filename-case': ['error', { case: 'kebabCase' }],
+      },
+    },
+    // Plain TypeScript modules: kebab-case, the charter default.
+    {
+      name: 'preflight/go-no-go-filenames',
+      files: ['**/*.ts'],
+      plugins: { unicorn: unicorn as unknown as ESLint.Plugin },
+      languageOptions: {
+        parser: tsParser as Linter.Parser,
+      },
+      rules: {
+        'unicorn/filename-case': [
+          'error',
+          { case: 'kebabCase', ignore: toolingOwnedDirectories },
+        ],
+      },
+    },
+    // Both cases pass because hooks, contexts and tests share the JSX extensions with components.
+    {
+      name: 'preflight/go-no-go-component-filenames',
+      files: ['**/*.tsx', '**/*.jsx'],
+      plugins: { unicorn: unicorn as unknown as ESLint.Plugin },
+      languageOptions: {
+        parser: tsParser as Linter.Parser,
+        parserOptions: { ecmaFeatures: { jsx: true } },
+      },
+      rules: {
+        'unicorn/filename-case': [
+          'error',
+          {
+            cases: { kebabCase: true, pascalCase: true },
+            ignore: toolingOwnedDirectories,
+          },
+        ],
       },
     },
     ];

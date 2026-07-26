@@ -193,6 +193,27 @@ function createFoo() { return { do() {} }; } // ✗
 
 Beyond the `preflight/` rules, both shared configs turn on a few third-party rules: `@typescript-eslint/member-ordering`, `@typescript-eslint/naming-convention`, and `unicorn/filename-case` in `go-no-go`, plus `@typescript-eslint/consistent-type-imports`, `@typescript-eslint/no-explicit-any`, and `import-x/no-default-export` in `recommended`. See the config source for the exact settings.
 
+#### File naming
+
+`unicorn/filename-case` is scoped by extension, because the correct case is a property of the framework rather than of the language:
+
+| Files | Allowed |
+| --- | --- |
+| `**/*.ts` | `kebab-case` |
+| `**/*.tsx`, `**/*.jsx` | `kebab-case` **or** `PascalCase` |
+
+JSX files accept both rather than mandating `PascalCase`, because hooks, context modules and tests (`user-card.test.tsx`) share those extensions with components. `UserCard.tsx` and `use-auth.tsx` both pass; `user_card.tsx` does not.
+
+Directory names owned by the tooling ecosystem are exempt, since renaming them breaks test discovery and module mocking:
+
+```js
+ignore: [/^__(tests|mocks|snapshots|fixtures)__$/]
+```
+
+Note that `ignore` short-circuits the whole rule for a path, so this exempts everything *inside* `__tests__` — file names included — not just the directory name itself. `unicorn/filename-case` offers no narrower option.
+
+Listing `**/*.jsx` means the preset lints `.jsx` files, which the `**/*.ts`/`**/*.tsx` rule blocks do not otherwise match. Those files are parsed with JSX enabled, but only `filename-case` applies to them.
+
 ## Registry auth
 
 GitHub Packages requires a token to install. Add these two lines to `.npmrc` — both are safe to commit, since `${GITHUB_TOKEN}` is an env-var reference that npm expands at read time, not your actual token:
