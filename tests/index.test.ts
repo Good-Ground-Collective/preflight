@@ -25,16 +25,20 @@ describe('plugin object', () => {
     expect(Array.isArray(configs['recommended'])).toBe(true);
   });
 
-  it('registers itself under the preflight plugin key in both configs', () => {
+  it('registers itself in every config entry that references a preflight rule', () => {
     const configs = plugin.configs as Record<
       string,
-      { plugins?: Record<string, unknown> }[]
+      { plugins?: Record<string, unknown>; rules?: Record<string, unknown> }[]
     >;
     for (const name of ['go-no-go', 'recommended']) {
-      const withPlugins = configs[name]!.filter((entry) => entry.plugins);
-      expect(withPlugins.length).toBeGreaterThan(0);
-      for (const entry of withPlugins) {
-        expect(entry.plugins!['preflight']).toBe(plugin);
+      const usingPreflightRules = configs[name]!.filter((entry) =>
+        Object.keys(entry.rules ?? {}).some((rule) =>
+          rule.startsWith('preflight/'),
+        ),
+      );
+      expect(usingPreflightRules.length).toBeGreaterThan(0);
+      for (const entry of usingPreflightRules) {
+        expect(entry.plugins?.['preflight']).toBe(plugin);
       }
     }
   });
