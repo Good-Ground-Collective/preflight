@@ -2,9 +2,9 @@ import type { TSESTree } from '@typescript-eslint/utils';
 import { createRule } from '../utils.js';
 
 /**
- * Built-in patterns are always active; user-supplied `patterns` extend them.
- * They are kept deliberately specific (digits required, exact file names) —
- * note that the uppercase-prefix pattern matches any ticket-style ID,
+ * Built-in patterns are always active; user-supplied `prefixes` and `patterns`
+ * extend them. They are kept deliberately specific (digits required, exact file
+ * names) — note that the uppercase-prefix pattern matches any ticket-style ID,
  * including todo-style tags with two digits; see the rule docs.
  */
 const defaultPatterns = [
@@ -18,7 +18,7 @@ const defaultPatterns = [
   'from a previous phase',
 ];
 
-type Options = [{ patterns?: string[] }];
+type Options = [{ patterns?: string[]; prefixes?: string[] }];
 type MessageIds = 'planningIdentifier' | 'removeComment';
 
 export const rule = createRule<Options, MessageIds>({
@@ -42,26 +42,46 @@ export const rule = createRule<Options, MessageIds>({
           patterns: {
             type: 'array',
             items: { type: 'string' },
+            description:
+              'Additional regular expressions to flag, in addition to the built-in patterns.',
+          },
+          prefixes: {
+            type: 'array',
+            items: { type: 'string' },
+            description:
+              'Ticket prefixes to flag when followed by a hyphen and digits. Matched literally; sugar over `patterns`.',
           },
         },
         additionalProperties: false,
       },
     ],
   },
-  defaultOptions: [{ patterns: [] }],
+  defaultOptions: [{ patterns: [], prefixes: [] }],
   create(context, [options]) {
     const { sourceCode } = context;
-    const regexes = [...defaultPatterns, ...(options.patterns ?? [])].map(
-      (pattern) => {
-        try {
-          return new RegExp(pattern, 'g');
-        } catch (error) {
-          throw new Error(
-            `no-planning-identifiers: invalid pattern ${JSON.stringify(pattern)}: ${String(error)}`,
-          );
-        }
-      },
+
+    /** Escape a prefix so regex metacharacters in it match themselves. */
+    function escapeForRegex(literal: string): string {
+      return literal.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+    }
+
+    const prefixPatterns = (options.prefixes ?? []).map(
+      (prefix) => String.raw`\b${escapeForRegex(prefix)}-\d+\b`,
     );
+
+    const regexes = [
+      ...defaultPatterns,
+      ...prefixPatterns,
+      ...(options.patterns ?? []),
+    ].map((pattern) => {
+      try {
+        return new RegExp(pattern, 'g');
+      } catch (error) {
+        throw new Error(
+          `no-planning-identifiers: invalid pattern ${JSON.stringify(pattern)}: ${String(error)}`,
+        );
+      }
+    });
 
     function reportNodeMatches(
       node: TSESTree.Node,

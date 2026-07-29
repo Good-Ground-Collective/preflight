@@ -127,12 +127,23 @@ const userSchema = z.object({}); // ✓ — allowlisted suffix
 
 #### no-planning-identifiers
 
-**Set: go-no-go · has options.** Catches planning-system identifiers — `Phase 2`, ticket IDs like `KAN-20`, `PLAN.md`, "from a previous phase" — in comments and strings, where they outlive the systems that gave them meaning. Comment hits get a remove *suggestion* (never auto-applied); string hits are report-only. Extend the built-in patterns with the `patterns` option, and suppress an intentional hit with an `eslint-disable` directive.
+**Set: go-no-go · has options.** Catches planning-system identifiers — `Phase 2`, ticket IDs like `KAN-20`, `PLAN.md`, "from a previous phase" — in comments and strings, where they outlive the systems that gave them meaning. Comment hits get a remove *suggestion* (never auto-applied); string hits are report-only. Suppress an intentional hit with an `eslint-disable` directive.
 
 ```ts
 // resolves D-09 open redirect  ✗
 /* Phase 2: wire the adapters */  // ✗
 ```
+
+Two additive options teach it your team's vocabulary — the built-in patterns always stay active:
+
+```js
+'preflight/no-planning-identifiers': ['error', {
+  prefixes: ['ACME', 'GH'],   // sugar → catches ACME-42, GH-7
+  patterns: ['sprint \\d+'],  // full regex escape hatch
+}],
+```
+
+`prefixes` compiles each entry to `\b<prefix>-\d+\b` with the prefix matched literally. The default `[A-Z]{3,}-\d\d` already catches most uppercase ticket IDs, so `prefixes` is for the shapes it misses — short (`GH-7`, `T-3`) and non-uppercase (`gh-7`) ones.
 
 [Full docs →](./docs/rules/no-planning-identifiers.md)
 
@@ -213,6 +224,35 @@ ignore: [/^__(tests|mocks|snapshots|fixtures)__$/]
 Note that `ignore` short-circuits the whole rule for a path, so this exempts everything *inside* `__tests__` — file names included — not just the directory name itself. `unicorn/filename-case` offers no narrower option.
 
 Listing `**/*.jsx` means the preset lints `.jsx` files, which the `**/*.ts`/`**/*.tsx` rule blocks do not otherwise match. Those files are parsed with JSX enabled, but only `filename-case` applies to them.
+
+#### Naming
+
+`@typescript-eslint/naming-convention` draws one line: **names you choose** are enforced, **names a third party chose** are not.
+
+| What | Required |
+| --- | --- |
+| Static class properties | `UPPER_CASE` |
+| Instance class properties, parameter properties | `camelCase` (leading `_` allowed) |
+| Variables, parameters, functions | `camelCase` |
+| `NULL_`/`UNKNOWN_` null-object constants | `UPPER_CASE` |
+| `const` bindings ending `Schema` or `Validator` | `camelCase` **or** `PascalCase` |
+| Types, interfaces, enums | `PascalCase` (no `I` prefix) |
+| Object-literal keys | any deliberate case |
+
+The `Schema`/`Validator` allowance uses the same suffix list that exempts a binding from [`no-loose-functions`](#no-loose-functions), so `export const UserSchema = z.object({})` satisfies both rules. The two are built from one constant, not kept in step by hand.
+
+**Object-literal keys** accept `camelCase`, `PascalCase`, `snake_case` and `UPPER_CASE`. Keys are overwhelmingly a wire format rather than a name — `issue_number` is Octokit's spelling, `Authorization` is the HTTP header, `JIRA_HOST` is the env var — and the previous `camelCase` mandate enforced casing on exactly the half of a contract that happened to be identifier-safe:
+
+```ts
+const HEADING_KEYS: Record<string, SectionKey> = {
+  'Problem Statement': 'problemStatement',   // exempt: requires quotes
+  Solution: 'solution',                      // was an error
+};
+```
+
+Only a key in no deliberate case at all (`issue_Number`) still fails. Class properties are unaffected — `class A { issue_number = 1 }` is still an error, because class state is yours to name.
+
+Members of `interface`/`type` declarations are not checked, for the same reason: they routinely mirror an API response shape.
 
 ## Registry auth
 

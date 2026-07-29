@@ -60,16 +60,39 @@ const label = 'phase one of the moon'; // prose without a digit does not match
 
 ## Options
 
+Both options are **additive**: the built-in defaults always stay active, and `prefixes` and `patterns` can be used together or independently.
+
 ```jsonc
 {
   "preflight/no-planning-identifiers": [
     "error",
-    { "patterns": ["TICKET-\\d+", "sprint \\d+"] }
+    {
+      "prefixes": ["ACME", "GH"],
+      "patterns": ["sprint \\d+"]
+    }
   ]
 }
 ```
 
-- `patterns` (`string[]`, default `[]`) — additional regular expressions (as strings, compiled with the `g` flag) to flag. User patterns **extend** the built-in defaults; they never replace them. An invalid regular expression throws a configuration error naming the offending pattern.
+### `prefixes`
+
+`string[]`, default `[]`. Ticket prefixes to flag, without writing a regular expression. Each compiles to `\b<prefix>-\d+\b` — the prefix, a hyphen, and one or more digits — so `{ "prefixes": ["GH"] }` catches `GH-7` and `GH-1234`.
+
+The prefix is **regex-escaped**, so metacharacters match themselves: `{ "prefixes": ["A.C"] }` catches `A.C-1` and not `AXC-1`.
+
+Matching is whole-word and case-sensitive, and the ticket-ID shape is required — a bare `ACME` in prose does not match, and neither does `GH-` with no digits.
+
+The default `[A-Z]{3,}-\d\d` already catches most uppercase ticket IDs (`REQ-42` is caught with no configuration), so `prefixes` earns its keep on the shapes that default misses:
+
+| Prefix | Catches | Why the default misses it |
+| --- | --- | --- |
+| `GH` | `GH-7` | fewer than three letters, one digit |
+| `T` | `T-1234` | one letter |
+| `gh` | `gh-7` | not uppercase |
+
+### `patterns`
+
+`string[]`, default `[]`. Additional regular expressions (as strings, compiled with the `g` flag) — the full escape hatch for anything `prefixes` cannot express, such as `sprint \d+` or `epic/\d+`. User patterns **extend** the built-in defaults; they never replace them. An invalid regular expression throws a configuration error naming the offending pattern.
 
 ## When not to use it
 
