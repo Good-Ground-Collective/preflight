@@ -72,6 +72,216 @@ function helper() {
 // boot note
 import { main } from './main.js';
 main();`,
+    // JSDoc attached to a method carrying an accessibility modifier.
+    `class Service {
+  /**
+   * Fetches a record by id.
+   * Throws when the record is absent.
+   */
+  public fetch(id: string): string {
+    return id;
+  }
+}`,
+    // JSDoc attached to a method with no accessibility modifier.
+    `class Service {
+  /**
+   * Fetches a record by id.
+   * Throws when the record is absent.
+   */
+  fetch(id: string): string {
+    return id;
+  }
+}`,
+    // JSDoc attached to a private method.
+    `class Service {
+  /**
+   * Normalises the raw payload.
+   * Callers outside the service never see this shape.
+   */
+  private normalise(raw: string): string {
+    return raw;
+  }
+}`,
+    // JSDoc attached to a static method.
+    `class Service {
+  /**
+   * Builds a service from environment configuration.
+   * Prefer this over the constructor.
+   */
+  static fromEnv(): Service {
+    return new Service();
+  }
+}`,
+    // JSDoc attached to a constructor.
+    `class Service {
+  /**
+   * Wires the collaborators this service needs.
+   * Kept private so callers go through fromEnv.
+   */
+  constructor(private readonly url: string) {}
+}`,
+    // JSDoc attached to a getter.
+    `class Service {
+  /**
+   * The resolved base URL.
+   * Computed once per call.
+   */
+  get baseUrl(): string {
+    return 'https://example.test';
+  }
+}`,
+    // JSDoc attached to a setter.
+    `class Service {
+  /**
+   * Overrides the resolved base URL.
+   * Intended for tests only.
+   */
+  set baseUrl(value: string) {
+    void value;
+  }
+}`,
+    // JSDoc attached to a class property holding an arrow function.
+    `class Service {
+  /**
+   * Retries the operation with backoff.
+   * Bound so it can be passed as a callback.
+   */
+  retry = (attempts: number): number => attempts;
+}`,
+    // JSDoc attached to a plain class property.
+    `class Service {
+  /**
+   * How many attempts remain before giving up.
+   * Decremented by retry.
+   */
+  attempts = 3;
+}`,
+    // JSDoc attached to an abstract method.
+    `abstract class Service {
+  /**
+   * Fetches a record by id.
+   * Implementations decide the transport.
+   */
+  abstract fetch(id: string): string;
+}`,
+    // JSDoc attached to an interface method signature.
+    `interface Service {
+  /**
+   * Fetches a record by id.
+   * Throws when the record is absent.
+   */
+  fetch(id: string): string;
+}`,
+    // JSDoc attached to an interface property signature.
+    `interface Service {
+  /**
+   * The resolved base URL.
+   * Always ends without a trailing slash.
+   */
+  baseUrl: string;
+}`,
+    // JSDoc attached to an interface index signature.
+    `interface Registry {
+  /**
+   * Arbitrary handlers keyed by event name.
+   * Keys are not validated.
+   */
+  [event: string]: () => void;
+}`,
+    // JSDoc attached to an enum member.
+    `enum Status {
+  /**
+   * The job has been accepted but not started.
+   * Terminal states never return here.
+   */
+  Pending = 'pending',
+}`,
+    // JSDoc attached to an object-literal method.
+    `const service = {
+  /**
+   * Fetches a record by id.
+   * Throws when the record is absent.
+   */
+  fetch(id: string): string {
+    return id;
+  },
+};
+export default service;`,
+    // JSDoc attached to an object-literal property.
+    `const config = {
+  /**
+   * How many attempts remain before giving up.
+   * Decremented by retry.
+   */
+  attempts: 3,
+};
+export default config;`,
+    // JSDoc attached to an ambient function declaration. Kept below another
+    // statement so the file-top header exemption cannot mask the result.
+    `const buffered = 0;
+/**
+ * Flushes the pending buffer.
+ * Callers must not rely on ordering.
+ */
+declare function flush(n: number): void;`,
+    // JSDoc attached to an abstract property.
+    `abstract class Service {
+  /**
+   * The resolved base URL.
+   * Implementations supply this.
+   */
+  abstract readonly baseUrl: string;
+}`,
+    // JSDoc attached to an auto-accessor property.
+    `class Service {
+  /**
+   * How many attempts remain before giving up.
+   * Exposed through a generated accessor pair.
+   */
+  accessor attempts = 3;
+}`,
+    // JSDoc attached to an abstract auto-accessor property.
+    `abstract class Service {
+  /**
+   * How many attempts remain before giving up.
+   * Implementations supply the initial value.
+   */
+  abstract accessor attempts: number;
+}`,
+    // JSDoc attached to an interface call signature.
+    `interface Handler {
+  /**
+   * Invokes the handler.
+   * Returns the count of processed records.
+   */
+  (event: string): number;
+}`,
+    // JSDoc attached to an interface construct signature.
+    `interface ServiceConstructor {
+  /**
+   * Builds a service bound to the given URL.
+   * Never throws.
+   */
+  new (url: string): object;
+}`,
+    // JSDoc attached to a namespace declaration.
+    `const version = 1;
+/**
+ * Ambient helpers exposed to consumers.
+ * Kept in a namespace for declaration merging.
+ */
+declare namespace helpers {
+  const build: () => number;
+}
+export default version;`,
+    // Two line comments attached (no blank line) to a method.
+    `class Service {
+  // helper used by the retry path
+  // kept separate so it can be stubbed
+  fetch(id: string): string {
+    return id;
+  }
+}`,
   ],
   invalid: [
     // Run of 3 consecutive line comments at file top.
@@ -152,6 +362,87 @@ export default config;`,
     {
       code: `// line one of an orphaned paragraph
 // line two of an orphaned paragraph`,
+      errors: [
+        {
+          messageId: 'fileTopRun',
+          line: 1,
+          endLine: 2,
+        },
+      ],
+    },
+    // A blank line detaches a paragraph from the method below it.
+    {
+      code: `class Service {
+  /* notes that drifted away from the method they describe */
+
+  fetch(id: string): string {
+    return id;
+  }
+}`,
+      errors: [
+        {
+          messageId: 'floatingParagraph',
+          line: 2,
+        },
+      ],
+    },
+    // Paragraph floating above a statement inside a method body still floats:
+    // members are declarations, the statements in their bodies are not.
+    {
+      code: `class Service {
+  fetch(id: string): string {
+    // narrative about the guard below
+    // that belongs in the method JSDoc
+    if (!id) {
+      return '';
+    }
+    return id;
+  }
+}`,
+      errors: [
+        {
+          messageId: 'floatingParagraph',
+          line: 3,
+          endLine: 4,
+        },
+      ],
+    },
+    // Block paragraph above a return inside a method body.
+    {
+      code: `class Service {
+  fetch(id: string): string {
+    /* narrative paragraph explaining the return value */
+    return id;
+  }
+}`,
+      errors: [
+        {
+          messageId: 'floatingParagraph',
+          line: 3,
+        },
+      ],
+    },
+    // Block paragraph above an expression statement inside a constructor.
+    {
+      code: `declare function register(s: unknown): void;
+class Service {
+  constructor() {
+    /* narrative paragraph about the registration side effect */
+    register(this);
+  }
+}`,
+      errors: [
+        {
+          messageId: 'floatingParagraph',
+          line: 4,
+        },
+      ],
+    },
+    // A file-top run is still a file-top run in a class-shaped file.
+    {
+      code: `// This service handles the frobnicator.
+// It was written long ago.
+export class Service {}`,
       errors: [
         {
           messageId: 'fileTopRun',

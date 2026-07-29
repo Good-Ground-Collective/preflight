@@ -121,7 +121,7 @@ const userSchema = z.object({}); // ✓ — allowlisted suffix
 
 #### no-paragraph-comments
 
-**Set: go-no-go.** Flags narrative comment blocks: two or more consecutive `//` lines at the top of a file, and paragraph comments (a block comment, or a 2+ line run) floating above non-declaration code. Concepts belong in JSDoc on the declaration they describe. Single why-comments, JSDoc attached to a declaration, license headers, shebangs, and `eslint-*` directives are left alone.
+**Set: go-no-go.** Flags narrative comment blocks: two or more consecutive `//` lines at the top of a file, and paragraph comments (a block comment, or a 2+ line run) floating above non-declaration code. Concepts belong in JSDoc on the declaration they describe. Single why-comments, JSDoc attached to a declaration — including class and interface members — license headers, shebangs, and `eslint-*` directives are left alone.
 
 [Full docs →](./docs/rules/no-paragraph-comments.md)
 
