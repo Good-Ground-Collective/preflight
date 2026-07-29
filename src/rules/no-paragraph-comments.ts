@@ -3,8 +3,13 @@ import type { TSESTree } from '@typescript-eslint/utils';
 import { createRule } from '../utils.js';
 
 /**
- * Statement types a comment may legitimately sit on top of: the paragraph is
+ * Node types a comment may legitimately sit on top of: the paragraph is
  * documentation for the declaration, so JSDoc conventions apply instead.
+ *
+ * Members count alongside top-level statements. In a service-shaped codebase
+ * most behaviour lives on class and interface members, so treating only
+ * statements as declarations would flag the very JSDoc this rule exists to
+ * encourage.
  */
 const declarationTypes: ReadonlySet<AST_NODE_TYPES> = new Set([
   AST_NODE_TYPES.FunctionDeclaration,
@@ -16,6 +21,21 @@ const declarationTypes: ReadonlySet<AST_NODE_TYPES> = new Set([
   AST_NODE_TYPES.TSInterfaceDeclaration,
   AST_NODE_TYPES.TSTypeAliasDeclaration,
   AST_NODE_TYPES.TSEnumDeclaration,
+  AST_NODE_TYPES.TSDeclareFunction,
+  AST_NODE_TYPES.TSModuleDeclaration,
+  AST_NODE_TYPES.MethodDefinition,
+  AST_NODE_TYPES.TSAbstractMethodDefinition,
+  AST_NODE_TYPES.PropertyDefinition,
+  AST_NODE_TYPES.TSAbstractPropertyDefinition,
+  AST_NODE_TYPES.AccessorProperty,
+  AST_NODE_TYPES.TSAbstractAccessorProperty,
+  AST_NODE_TYPES.Property,
+  AST_NODE_TYPES.TSMethodSignature,
+  AST_NODE_TYPES.TSPropertySignature,
+  AST_NODE_TYPES.TSIndexSignature,
+  AST_NODE_TYPES.TSCallSignatureDeclaration,
+  AST_NODE_TYPES.TSConstructSignatureDeclaration,
+  AST_NODE_TYPES.TSEnumMember,
 ]);
 
 /** A paragraph: one Block comment, or a run of adjacent Line comments. */

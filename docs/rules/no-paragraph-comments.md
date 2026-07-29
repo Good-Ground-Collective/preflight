@@ -23,13 +23,20 @@ lint time.
    `return`, ...).
 
 A comment counts as **attached** only when there is no blank line between it
-and the next statement AND that statement is a declaration
-(`function`, `class`, `const`/`let`/`var`, `import`, `export`, `interface`,
-`type`, `enum`).
+and the code below AND that code is a declaration. Declarations include both
+top-level statements (`function`, `class`, `const`/`let`/`var`, `import`,
+`export`, `interface`, `type`, `enum`, `declare`, `namespace`) and members
+(class methods, constructors, getters/setters, properties and auto-accessors —
+including their `abstract` forms; interface method, property, index, call and
+construct signatures; enum members; and object-literal properties and methods).
+
+Statements *inside* a member body are not declarations, so a paragraph floating
+above an `if` or a `return` within a method is still flagged.
 
 ## What it leaves alone
 
-- JSDoc (or any comment) attached directly to a declaration.
+- JSDoc (or any comment) attached directly to a declaration, including class
+  and interface members.
 - A single `//` why-comment above any line of code.
 - A single trailing comment on the same line as code.
 - `eslint-*` directive comments (`/* eslint-disable */`,
@@ -64,6 +71,19 @@ function main() {
 ```
 
 ```ts
+class Service {
+  fetch(id: string): string {
+    // narrative about the guard below
+    // that belongs in the method JSDoc
+    if (!id) {
+      return '';
+    }
+    return id;
+  }
+}
+```
+
+```ts
 /* configuration notes that drifted from the code */
 
 const config = { seed };
@@ -77,6 +97,18 @@ const config = { seed };
  */
 export function add(a: number, b: number): number {
   return a + b;
+}
+```
+
+```ts
+class Service {
+  /**
+   * Fetches a record by id.
+   * Throws when the record is absent.
+   */
+  public fetch(id: string): string {
+    return id;
+  }
 }
 ```
 
