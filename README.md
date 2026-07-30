@@ -204,6 +204,31 @@ function createFoo() { return { do() {} }; } // ✗
 
 Beyond the `preflight/` rules, both shared configs turn on a few third-party rules: `@typescript-eslint/member-ordering`, `@typescript-eslint/naming-convention`, and `unicorn/filename-case` in `go-no-go`, plus `@typescript-eslint/consistent-type-imports`, `@typescript-eslint/no-explicit-any`, and `import-x/no-default-export` in `recommended`. See the config source for the exact settings.
 
+#### Member order
+
+`@typescript-eslint/member-ordering` fixes one order for class members, visibility descending within each tier:
+
+| # | Tier |
+| --- | --- |
+| 1 | Index signatures (`readonly` and mutable share a rank) |
+| 2 | Instance fields — `public`, `protected`, `private`, `#private`, then `abstract` |
+| 3 | The constructor |
+| 4 | Accessors — `get` before its `set`, instance then `abstract` |
+| 5 | Instance methods — `public`, `protected`, `private`, `#private`, then `abstract` |
+| 6 | Static fields, then `static {}` initialization blocks |
+| 7 | Static accessors, then static methods |
+
+Two choices in there are worth naming, because either direction is defensible:
+
+- **Accessors sit above the methods**, on the reasoning that a getter is a field-like read and belongs nearer the state it exposes.
+- **Abstract members sort last within their own tier** rather than forming one block after the constructor, so a base class reads as fields-then-methods like any other.
+
+The list names every category explicitly, including `#private` members and static accessors. That is deliberate rather than verbose: `memberTypes` is **exhaustive, not a prefix** — a category absent from the array is unranked and may appear anywhere without violating the rule. A partial list silently has no opinion about whatever it omits.
+
+Members whose category the list ranks by a *more specific* name win over a broader one, so `readonly` and decorated members follow their visibility tier rather than needing entries of their own.
+
+One limit: this orders **classes only**. Interface and type-literal members match only the unqualified `field`/`method` names — they have no visibility or scope to rank — so the preset deliberately says nothing about the order of members inside an `interface` or `type`.
+
 #### File naming
 
 `unicorn/filename-case` is scoped by extension, because the correct case is a property of the framework rather than of the language:
