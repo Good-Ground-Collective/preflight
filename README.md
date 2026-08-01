@@ -298,4 +298,4 @@ In GitHub Actions, no PAT is needed — set `NODE_AUTH_TOKEN: ${{ secrets.GITHUB
 
 ## License
 
-MIT
+[Apache License 2.0](LICENSE)
