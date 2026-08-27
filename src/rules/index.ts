@@ -3,6 +3,7 @@ export { rule as 'constructor-single-props' } from './constructor-single-props.j
 export { rule as 'error-class-sets-name' } from './error-class-sets-name.js';
 export { rule as 'no-chained-type-assertions' } from './no-chained-type-assertions.js';
 export { rule as 'no-conditional-empty-object-spread' } from './no-conditional-empty-object-spread.js';
+export { rule as 'no-known-value-widening' } from './no-known-value-widening.js';
 export { rule as 'no-loose-functions' } from './no-loose-functions.js';
 export { rule as 'no-module-mocking' } from './no-module-mocking.js';
 export { rule as 'no-object-parameters' } from './no-object-parameters.js';
@@ -19,5 +20,6 @@ export { rule as 'no-unknown-parameters' } from './no-unknown-parameters.js';
 export { rule as 'no-unknown-returns' } from './no-unknown-returns.js';
 export { rule as 'no-unknown-type-aliases' } from './no-unknown-type-aliases.js';
 export { rule as 'no-unsafe-dictionary-type' } from './no-unsafe-dictionary-type.js';
+export { rule as 'no-widen-then-assert' } from './no-widen-then-assert.js';
 export { rule as 'require-safety-comment-for-type-assertion' } from './require-safety-comment-for-type-assertion.js';
 export { rule as 'service-shape' } from './service-shape.js';
