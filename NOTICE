@@ -1,0 +1,53 @@
+@good-ground-collective/preflight
+Copyright 2026 Good Ground Collective
+
+This product includes software developed at Good Ground Collective, licensed
+under the Apache License, Version 2.0. See LICENSE.
+
+--------------------------------------------------------------------------------
+
+This product contains rules ported from anti-slop
+(https://github.com/dmmulroy/anti-slop), which is licensed under the MIT
+License. The following rules are derived from that project, along with the
+supporting modules src/dictionary-types.ts and src/type-scope.ts:
+
+  src/rules/no-chained-type-assertions.ts
+  src/rules/no-conditional-empty-object-spread.ts
+  src/rules/no-known-value-widening.ts
+  src/rules/no-module-mocking.ts
+  src/rules/no-object-parameters.ts
+  src/rules/no-reflect-apply.ts
+  src/rules/no-reflect-get.ts
+  src/rules/no-runtime-typeof.ts
+  src/rules/no-service-constructor-imports.ts
+  src/rules/no-shape-in-symbol-names.ts
+  src/rules/no-unknown-parameters.ts
+  src/rules/no-unknown-returns.ts
+  src/rules/no-unknown-type-aliases.ts
+  src/rules/no-unsafe-dictionary-type.ts
+  src/rules/no-widen-then-assert.ts
+  src/rules/require-safety-comment-for-type-assertion.ts
+
+Upstream license text follows.
+
+MIT License
+
+Copyright (c) 2026 Dillon Mulroy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

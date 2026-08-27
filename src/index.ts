@@ -3,6 +3,10 @@ import type { ESLint } from 'eslint';
 import * as rules from './rules/index.js';
 import { goNoGoBuilder } from './configs/go-no-go.js';
 import { recommendedBuilder } from './configs/recommended.js';
+import {
+  antiSlopBuilder,
+  antiSlopEffectBuilder,
+} from './configs/anti-slop.js';
 
 const pkg = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
@@ -25,6 +29,9 @@ const goNoGo = goNoGoBuilder.build(plugin);
 Object.assign(plugin.configs!, {
   'go-no-go': goNoGo,
   recommended: recommendedBuilder.build(plugin, goNoGo),
+  // Opt-in layers; deliberately not folded into recommended. See configs/anti-slop.ts.
+  'anti-slop': antiSlopBuilder.build(plugin),
+  'anti-slop-effect': antiSlopEffectBuilder.build(plugin),
 });
 
 // eslint-disable-next-line import-x/no-default-export -- flat-config consumers import the plugin object as the module default

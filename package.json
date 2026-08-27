@@ -1,7 +1,7 @@
 {
   "name": "@good-ground-collective/preflight",
   "version": "0.1.0",
-  "description": "ESLint plugin enforcing the coding charter — nit-level review feedback, caught before the PR",
+  "description": "ESLint plugin enforcing the coding charter \u2014 nit-level review feedback, caught before the PR",
   "type": "module",
   "license": "Apache-2.0",
   "publishConfig": {
@@ -18,7 +18,8 @@
     "typescript"
   ],
   "files": [
-    "dist"
+    "dist",
+    "NOTICE"
   ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
