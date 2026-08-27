@@ -2,7 +2,18 @@ import type { TSESTree } from '@typescript-eslint/utils';
 import { AST_NODE_TYPES } from '@typescript-eslint/utils';
 import { createRule } from '../utils.js';
 
-type ParameterOwner = TSESTree.Node & { params: TSESTree.Parameter[] };
+/** Every construct that declares a parameter list. */
+type ParameterOwner =
+  | TSESTree.ArrowFunctionExpression
+  | TSESTree.FunctionDeclaration
+  | TSESTree.FunctionExpression
+  | TSESTree.TSCallSignatureDeclaration
+  | TSESTree.TSConstructSignatureDeclaration
+  | TSESTree.TSConstructorType
+  | TSESTree.TSDeclareFunction
+  | TSESTree.TSEmptyBodyFunctionExpression
+  | TSESTree.TSFunctionType
+  | TSESTree.TSMethodSignature;
 
 /**
  * `RestElement.argument` widens to `DestructuringPattern`, which admits a
