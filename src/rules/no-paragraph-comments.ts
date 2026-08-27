@@ -147,9 +147,9 @@ export const rule = createRule({
 
           // (b) Elsewhere: a block comment or a multi-line run is a
           // paragraph unless it is attached to a declaration.
-          const isParagraphShaped =
+          const isParagraphLike =
             first.type === AST_TOKEN_TYPES.Block || paragraph.length >= 2;
-          if (!isParagraphShaped) {
+          if (!isParagraphLike) {
             continue;
           }
 

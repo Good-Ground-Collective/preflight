@@ -4,8 +4,9 @@ Disallow project-local `make<CapabilityName>` imports outside test and spec
 files.
 
 > This rule presumes an [Effect](https://effect.website) service architecture.
-> It ships in the opt-in `anti-slop-effect` config rather than in `anti-slop`,
-> and is meaningless in a codebase that does not use Effect services.
+> It ships in `recommended` rather than in the `go-no-go` gate, and is
+> meaningless in a codebase that does not use Effect services — there it will
+> flag any project-local `make<Something>` import. Turn it off if that is you.
 
 ## Rule details
 
@@ -69,8 +70,15 @@ None.
 
 ## When not to use it
 
-If your project does not use Effect services, do not enable this rule. It ships
-in `anti-slop-effect` for exactly that reason.
+If your project does not use Effect services, turn this rule off. It is in
+`recommended` rather than `go-no-go` for exactly that reason:
+
+```js
+export default [
+  ...preflight.configs.recommended,
+  { rules: { 'preflight/no-service-constructor-imports': 'off' } },
+];
+```
 
 ## Attribution
 
