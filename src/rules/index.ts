@@ -1,9 +1,20 @@
 // Rule modules keyed by their short name; keep exports alphabetized.
 export { rule as 'constructor-single-props' } from './constructor-single-props.js';
 export { rule as 'error-class-sets-name' } from './error-class-sets-name.js';
+export { rule as 'no-chained-type-assertions' } from './no-chained-type-assertions.js';
+export { rule as 'no-conditional-empty-object-spread' } from './no-conditional-empty-object-spread.js';
 export { rule as 'no-loose-functions' } from './no-loose-functions.js';
+export { rule as 'no-module-mocking' } from './no-module-mocking.js';
 export { rule as 'no-paragraph-comments' } from './no-paragraph-comments.js';
 export { rule as 'no-planning-identifiers' } from './no-planning-identifiers.js';
+export { rule as 'no-reflect-apply' } from './no-reflect-apply.js';
+export { rule as 'no-reflect-get' } from './no-reflect-get.js';
+export { rule as 'no-runtime-typeof' } from './no-runtime-typeof.js';
+export { rule as 'no-service-constructor-imports' } from './no-service-constructor-imports.js';
+export { rule as 'no-shape-in-symbol-names' } from './no-shape-in-symbol-names.js';
 export { rule as 'no-switch-with-nested-if' } from './no-switch-with-nested-if.js';
 export { rule as 'no-throw-helpers' } from './no-throw-helpers.js';
+export { rule as 'no-unknown-parameters' } from './no-unknown-parameters.js';
+export { rule as 'no-unknown-type-aliases' } from './no-unknown-type-aliases.js';
+export { rule as 'require-safety-comment-for-type-assertion' } from './require-safety-comment-for-type-assertion.js';
 export { rule as 'service-shape' } from './service-shape.js';
