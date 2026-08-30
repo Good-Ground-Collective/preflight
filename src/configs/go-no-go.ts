@@ -38,8 +38,6 @@ export const goNoGoBuilder = {
         'preflight/no-throw-helpers': 'error',
         'preflight/no-switch-with-nested-if': 'error',
         'preflight/error-class-sets-name': 'error',
-        // Ported from dmmulroy/anti-slop. Only the mechanical ones land here:
-        // each decides on syntax alone, with no heuristic that could misfire.
         'preflight/no-chained-type-assertions': 'error',
         'preflight/no-conditional-empty-object-spread': 'error',
         'preflight/no-module-mocking': 'error',

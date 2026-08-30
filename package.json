@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "ESLint plugin enforcing the coding charter \u2014 nit-level review feedback, caught before the PR",
   "type": "module",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
