@@ -20,7 +20,7 @@ The extra packages are peer dependencies the shared configs wire in. (`eslint-pl
 
 ## Quickstart
 
-The plugin ships two ready-made flat configs, both arrays you spread into your config:
+The plugin ships four ready-made flat configs, all arrays you spread into your config:
 
 | Config | What it is |
 | --- | --- |
@@ -89,6 +89,54 @@ Every rule is prefixed `preflight/` and is a pure AST check (no type information
 | [`no-throw-helpers`](#no-throw-helpers) | go-no-go | No functions whose whole body is a `throw`. |
 | [`constructor-single-props`](#constructor-single-props) | recommended | Constructors take a single props object. |
 | [`service-shape`](#service-shape) | recommended | Services follow interface → class → singleton. |
+| [`no-chained-type-assertions`](docs/rules/no-chained-type-assertions.md) | go-no-go | No `x as unknown as T` assertion chains. |
+| [`no-conditional-empty-object-spread`](docs/rules/no-conditional-empty-object-spread.md) | go-no-go | No `...(cond ? { a } : {})` to omit fields. |
+| [`no-known-value-widening`](docs/rules/no-known-value-widening.md) | recommended | No annotating a known value with a broader type. |
+| [`no-module-mocking`](docs/rules/no-module-mocking.md) | go-no-go | No `vi.mock` / `jest.mock`. |
+| [`no-object-parameters`](docs/rules/no-object-parameters.md) | recommended | No `object` as a parameter type. |
+| [`no-reflect-apply`](docs/rules/no-reflect-apply.md) | go-no-go | No `Reflect.apply`. |
+| [`no-reflect-get`](docs/rules/no-reflect-get.md) | go-no-go | No `Reflect.get`. |
+| [`no-runtime-typeof`](docs/rules/no-runtime-typeof.md) | recommended | No runtime `typeof` checks. |
+| [`no-shape-in-symbol-names`](docs/rules/no-shape-in-symbol-names.md) | recommended | No structural terms in symbol names. |
+| [`no-unknown-parameters`](docs/rules/no-unknown-parameters.md) | recommended | No `unknown` parameters except `cause`. |
+| [`no-unknown-returns`](docs/rules/no-unknown-returns.md) | recommended | No `unknown` / `Promise<unknown>` return contracts. |
+| [`no-unknown-type-aliases`](docs/rules/no-unknown-type-aliases.md) | go-no-go | No named aliases for `unknown`. |
+| [`no-unsafe-dictionary-type`](docs/rules/no-unsafe-dictionary-type.md) | recommended | No dictionaries with an escape-hatch value type. |
+| [`no-widen-then-assert`](docs/rules/no-widen-then-assert.md) | recommended | No widening a known value then asserting it back. |
+| [`require-safety-comment-for-type-assertion`](docs/rules/require-safety-comment-for-type-assertion.md) | recommended | Every assertion needs a `SAFETY:` note. |
+| [`no-service-constructor-imports`](docs/rules/no-service-constructor-imports.md) | recommended | No project-local `make<Capability>` imports in runtime code. |
+
+### Anti-slop rules
+
+These sixteen rules are ported from [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop) (MIT), an oxlint plugin that rejects low-evidence TypeScript — the reflexively defensive patterns that show up in generated code. Each has its own page under [`docs/rules/`](docs/rules).
+
+They are split across the two existing sets by the same test everything else uses: does it decide on syntax alone?
+
+**In `go-no-go`** — mechanical, no heuristic that can misfire: `no-chained-type-assertions`, `no-conditional-empty-object-spread`, `no-module-mocking`, `no-reflect-apply`, `no-reflect-get`, `no-unknown-type-aliases`.
+
+**In `recommended` only** — broad by design, or resolving types heuristically without a type checker, so each can flag code that is genuinely fine. `no-runtime-typeof` bans every `typeof` outside a declared type guard; `no-object-parameters` bans `object` as a parameter type; `no-unknown-parameters` / `no-unknown-returns` ban `unknown` at boundaries; `no-shape-in-symbol-names` matches by substring, so `isParagraphShaped` reports; `require-safety-comment-for-type-assertion` demands a note on every assertion; `no-known-value-widening`, `no-widen-then-assert` and `no-unsafe-dictionary-type` resolve aliases and local flow by hand. `no-service-constructor-imports` also sits here because it presumes an [Effect](https://effect.website) service architecture — outside one, it flags any project-local `make<Capability>` import.
+
+Expect a migration when you adopt `recommended`. Preflight's own source does not yet satisfy all of them: [`eslint.config.ts`](eslint.config.ts) turns five off for `src/**`, each with its reason. Turning an individual rule off is the same shape:
+
+```js
+import preflight from '@good-ground-collective/preflight';
+
+export default [
+  ...preflight.configs.recommended,
+  {
+    files: ['src/**'],
+    rules: {
+      'preflight/require-safety-comment-for-type-assertion': 'off',
+      'preflight/no-runtime-typeof': 'off',
+    },
+  },
+];
+```
+
+Two of them take options:
+
+- `no-runtime-typeof` — `allowInTypeGuards` (default `false` on the rule, set to `true` by `recommended`) exempts `typeof` inside a function declaring a `value is T` return type.
+- `no-shape-in-symbol-names` — `terms` (default `['shape']`) replaces the banned substring list.
 
 ### go-no-go rules
 
@@ -298,4 +346,8 @@ In GitHub Actions, no PAT is needed — set `NODE_AUTH_TOKEN: ${{ secrets.GITHUB
 
 ## License
 
-[Apache License 2.0](LICENSE)
+[MIT License](LICENSE)
+
+### Third-party
+
+The sixteen rules marked as ported in the table above come from [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop), which is MIT licensed. See [NOTICE](NOTICE) for the upstream copyright and license text.

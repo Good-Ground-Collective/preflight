@@ -38,6 +38,12 @@ export const goNoGoBuilder = {
         'preflight/no-throw-helpers': 'error',
         'preflight/no-switch-with-nested-if': 'error',
         'preflight/error-class-sets-name': 'error',
+        'preflight/no-chained-type-assertions': 'error',
+        'preflight/no-conditional-empty-object-spread': 'error',
+        'preflight/no-module-mocking': 'error',
+        'preflight/no-reflect-apply': 'error',
+        'preflight/no-reflect-get': 'error',
+        'preflight/no-unknown-type-aliases': 'error',
         '@typescript-eslint/member-ordering': [
           'error',
           {

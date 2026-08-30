@@ -1,6 +1,7 @@
 import type { Linter } from 'eslint';
 import { describe, expect, it } from 'vitest';
 import plugin from '../../src/index.js';
+import * as ruleModules from '../../src/rules/index.js';
 
 type Severity = 0 | 1 | 2;
 
@@ -36,6 +37,13 @@ const deterministicRules = [
   'preflight/no-throw-helpers',
   'preflight/no-switch-with-nested-if',
   'preflight/error-class-sets-name',
+  // Ported from anti-slop; these decide on syntax alone, so they gate.
+  'preflight/no-chained-type-assertions',
+  'preflight/no-conditional-empty-object-spread',
+  'preflight/no-module-mocking',
+  'preflight/no-reflect-apply',
+  'preflight/no-reflect-get',
+  'preflight/no-unknown-type-aliases',
 ];
 
 const stockGoNoGoRules = [
@@ -50,6 +58,18 @@ const recommendedOnlyRules = [
   '@typescript-eslint/consistent-type-imports',
   '@typescript-eslint/no-explicit-any',
   'import-x/no-default-export',
+  // Ported from anti-slop; each is broad by design or resolves types
+  // heuristically, so it can flag correct code and must not gate a merge.
+  'preflight/no-known-value-widening',
+  'preflight/no-object-parameters',
+  'preflight/no-runtime-typeof',
+  'preflight/no-service-constructor-imports',
+  'preflight/no-shape-in-symbol-names',
+  'preflight/no-unknown-parameters',
+  'preflight/no-unknown-returns',
+  'preflight/no-unsafe-dictionary-type',
+  'preflight/no-widen-then-assert',
+  'preflight/require-safety-comment-for-type-assertion',
 ];
 
 describe('go-no-go contents', () => {
@@ -88,5 +108,19 @@ describe('recommended ⊇ go-no-go (mechanical superset)', () => {
     expect(goNoGo.size).toBeGreaterThanOrEqual(
       deterministicRules.length + stockGoNoGoRules.length,
     );
+  });
+});
+
+describe('every rule ships in a config', () => {
+  it('places each exported rule in go-no-go or recommended', () => {
+    const shipped = new Set([...goNoGo.keys(), ...recommended.keys()]);
+    const orphans = Object.keys(ruleModules)
+      .map((name) => `preflight/${name}`)
+      .filter((rule) => !shipped.has(rule));
+    expect(orphans).toEqual([]);
+  });
+
+  it('exposes exactly the two config groups', () => {
+    expect(Object.keys(configs).sort()).toEqual(['go-no-go', 'recommended']);
   });
 });
