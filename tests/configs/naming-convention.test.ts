@@ -94,6 +94,8 @@ describe('object-literal keys carry external contracts', () => {
     ['module mock factory', 'const m = { JiraClient: 1, Octokit: 2 };'],
     ['heading lookup table', 'const h = { Solution: "solution" };'],
     ['API response field', 'const r = { _links: 1 };'],
+    ['Salesforce custom field', 'const r = { ThinkLPNext__Status__c: 1 };'],
+    ['Salesforce relationship field', 'const r = { Account__r: 1 };'],
   ])('accepts %s', async (_label, code) => {
     await accepts(code)();
   });
@@ -104,6 +106,10 @@ describe('object-literal keys carry external contracts', () => {
 
   it('does not leak the allowance to class properties', async () => {
     await rejects('class A { issue_number = 1; }')();
+  });
+
+  it('does not leak the double-underscore allowance to class properties', async () => {
+    await rejects('class A { ThinkLPNext__Status__c = 1; }')();
   });
 });
 
