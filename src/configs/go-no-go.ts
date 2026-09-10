@@ -157,6 +157,12 @@ export const goNoGoBuilder = {
             format: ['camelCase', 'PascalCase', 'snake_case', 'UPPER_CASE'],
             leadingUnderscore: 'allow',
           },
+          // Namespaced external keys join tokens with a double underscore no standard case matches (`ThinkLPNext__Status__c`, a Salesforce custom field; `Foo__r` relationship fields). They are the platform's identifiers, not ours to case, so they pass on shape rather than being forced into quotes. Last so it wins over the case entry above for the keys it matches.
+          {
+            selector: 'objectLiteralProperty',
+            filter: { regex: '__', match: true },
+            format: null,
+          },
         ],
       },
     },

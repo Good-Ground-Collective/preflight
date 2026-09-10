@@ -323,7 +323,7 @@ const HEADING_KEYS: Record<string, SectionKey> = {
 };
 ```
 
-Only a key in no deliberate case at all (`issue_Number`) still fails. Class properties are unaffected — `class A { issue_number = 1 }` is still an error, because class state is yours to name.
+Keys that join tokens with a double underscore are exempt outright — `ThinkLPNext__Status__c` (a Salesforce custom field) and `Foo__r` relationship fields match no standard case, so they pass on shape rather than being forced into quotes. Only a single-token key in no deliberate case at all (`issue_Number`) still fails. Class properties are unaffected — `class A { issue_number = 1 }` is still an error, because class state is yours to name.
 
 Members of `interface`/`type` declarations are not checked, for the same reason: they routinely mirror an API response shape.
 
