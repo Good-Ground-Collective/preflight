@@ -133,8 +133,9 @@ export default [
 ];
 ```
 
-Two of them take options:
+Three of them take options:
 
+- `error-class-sets-name` — `selfNamingBases` (default `[]`) lists base classes that set `name` themselves, such as `DomainError`. Their subclasses are exempt; with typed linting, so are deeper descendants.
 - `no-runtime-typeof` — `allowInTypeGuards` (default `false` on the rule, set to `true` by `recommended`) exempts `typeof` inside a function declaring a `value is T` return type.
 - `no-shape-in-symbol-names` — `terms` (default `['shape']`) replaces the banned substring list.
 

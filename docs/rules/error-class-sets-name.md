@@ -42,6 +42,25 @@ class ParseError extends AppError {
 }
 ```
 
+## Options
+
+`selfNamingBases` (`string[]`, default `[]`) lists base classes that set `name` themselves. A subclass of a listed base is not reported.
+
+```ts
+// eslint config: 'preflight/error-class-sets-name': ['error', { selfNamingBases: ['DomainError'] }]
+
+abstract class DomainError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = new.target.name;
+  }
+}
+
+class NotFoundError extends DomainError {} // ✓ — DomainError sets `name`
+```
+
+The rule always exempts a class whose direct superclass is listed. With typed linting (a parser program), it also exempts a class when any ancestor in its base chain is a listed class, so `class B extends NotFoundError {}` passes. Without type information it checks only the direct superclass, so `B` is reported unless `NotFoundError` is also listed. The rule does not require type information.
+
 ## Autofix
 
 The rule is autofixable (`meta.fixable: 'code'`): it inserts `override name = '<ClassName>';` immediately after the class body's opening `{`, which works for empty and non-empty bodies alike. The class name is taken from the class's own identifier, or — for an anonymous class expression — from the variable it is assigned to:
@@ -62,6 +81,7 @@ Notes:
 
 ## Limitations (accepted)
 
-- **Imported or renamed base classes:** detection is purely by identifier name. A base class that is imported under a name not ending in `Error` (or aliased, or reached via a member expression like `bases.Error`) is not detected — this is a pure-AST rule with no type information. If this gap ever matters, `@typescript-eslint/type-utils`'s `isErrorLike` is the escape hatch, at the cost of requiring typed linting.
+- **Imported or renamed base classes:** detection is purely by identifier name. A base class that is imported under a name not ending in `Error` (or aliased, or reached via a member expression like `bases.Error`) is not detected — error-likeness is decided by the superclass identifier alone. Type information is used only for `selfNamingBases`. If this gap ever matters, `@typescript-eslint/type-utils`'s `isErrorLike` is the escape hatch, at the cost of requiring typed linting.
 - **Shallow constructor heuristic:** only top-level `this.name = …` statements in the constructor count. An assignment nested inside an `if`/`try`, or done via a helper, is not recognized and the class is flagged.
 - Conversely, any identifier ending in `Error` is treated as error-like even if it does not actually extend `Error`.
+- **`selfNamingBases` matches by name:** a listed name exempts any base class with that name, including an unrelated class from another module or an import renamed to that name.
