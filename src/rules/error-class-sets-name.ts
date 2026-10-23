@@ -1,9 +1,12 @@
 import type { TSESTree } from '@typescript-eslint/utils';
+import { ESLintUtils } from '@typescript-eslint/utils';
+import type * as ts from 'typescript';
 import { createRule } from '../utils.js';
 
 type ClassNode = TSESTree.ClassDeclaration | TSESTree.ClassExpression;
+type Options = [{ selfNamingBases?: string[] }];
 
-export const rule = createRule({
+export const rule = createRule<Options, 'missingName'>({
   name: 'error-class-sets-name',
   meta: {
     type: 'problem',
@@ -16,11 +19,50 @@ export const rule = createRule({
       missingName:
         "Error class '{{name}}' never sets `name`; at runtime its errors will identify as the base class. Add `override name = '{{name}}';`.",
     },
-    schema: [],
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          selfNamingBases: {
+            type: 'array',
+            items: { type: 'string' },
+            uniqueItems: true,
+            description:
+              'Base classes that set `name` themselves. Subclasses of these are exempt.',
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
   },
-  defaultOptions: [],
-  create(context) {
+  defaultOptions: [{ selfNamingBases: [] }],
+  create(context, [{ selfNamingBases = [] }]) {
     const { sourceCode } = context;
+    const selfNaming = new Set(selfNamingBases);
+    // Type information is optional: without a program only the direct superclass is checked.
+    const services = ESLintUtils.getParserServices(context, true);
+    const program = services.program;
+
+    /** Does any class in `node`'s base chain have a symbol name in `selfNamingBases`? */
+    function inheritsSelfNaming(node: ClassNode): boolean {
+      if (program == null || selfNaming.size === 0) return false;
+      const checker = program.getTypeChecker();
+      const tsNode = services.esTreeNodeToTSNodeMap.get(node);
+      const seen = new Set<ts.Type>();
+      const pending = checker
+        .getBaseTypes(checker.getTypeAtLocation(tsNode) as ts.InterfaceType)
+        .slice();
+      for (let type = pending.pop(); type != null; type = pending.pop()) {
+        if (seen.has(type)) continue;
+        seen.add(type);
+        const symbolName = type.getSymbol()?.getName();
+        if (symbolName != null && selfNaming.has(symbolName)) return true;
+        if (type.isClassOrInterface()) {
+          pending.push(...checker.getBaseTypes(type));
+        }
+      }
+      return false;
+    }
 
     /**
      * `name` counts as set when the class body has a non-static, non-computed
@@ -60,6 +102,9 @@ export const rule = createRule({
       const errorLike =
         superClass?.type === 'Identifier' && /Error$/.test(superClass.name);
       if (!errorLike || setsName(node)) {
+        return;
+      }
+      if (selfNaming.has(superClass.name) || inheritsSelfNaming(node)) {
         return;
       }
 

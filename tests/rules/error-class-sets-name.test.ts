@@ -1,7 +1,32 @@
+import { fileURLToPath } from 'node:url';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { rule } from '../../src/rules/error-class-sets-name.js';
 
 const ruleTester = new RuleTester();
+
+const typedRuleTester = new RuleTester({
+  languageOptions: {
+    parserOptions: {
+      projectService: { allowDefaultProject: [] },
+      tsconfigRootDir: fileURLToPath(
+        new URL('../fixtures/typed', import.meta.url),
+      ),
+    },
+  },
+});
+
+const selfNamingBases: [{ selfNamingBases: string[] }] = [
+  { selfNamingBases: ['DomainError'] },
+];
+const domainBase = `abstract class DomainError extends Error {
+  constructor() {
+    super();
+    this.name = new.target.name;
+  }
+}`;
+const grandchild = `${domainBase}
+class AError extends DomainError {}
+class BError extends AError {}`;
 
 ruleTester.run('error-class-sets-name', rule, {
   valid: [
@@ -127,6 +152,72 @@ ruleTester.run('error-class-sets-name', rule, {
 \tclass TabError extends Error {
    override name = 'TabError';}
 }`,
+    },
+  ],
+});
+
+ruleTester.run('error-class-sets-name (selfNamingBases)', rule, {
+  valid: [
+    // Direct subclass of a listed base.
+    { code: 'class AError extends DomainError {}', options: selfNamingBases },
+    // Listed base that does not end in "Error" never reaches the Error check.
+    { code: 'class A extends Base {}', options: [{ selfNamingBases: ['Base'] }] },
+    // Without type info only the direct superclass is checked, so listing the
+    // intermediate class is how to exempt its subclasses.
+    {
+      code: 'class BError extends AError {}',
+      options: [{ selfNamingBases: ['AError'] }],
+    },
+  ],
+  invalid: [
+    // Empty list behaves exactly as before.
+    {
+      code: 'class AError extends DomainError {}',
+      options: [{ selfNamingBases: [] }],
+      errors: [{ messageId: 'missingName', data: { name: 'AError' } }],
+      output: `class AError extends DomainError {
+  override name = 'AError';}`,
+    },
+    // A non-listed Error base is still reported and fixed.
+    {
+      code: 'class AError extends FooError {}',
+      options: selfNamingBases,
+      errors: [{ messageId: 'missingName', data: { name: 'AError' } }],
+      output: `class AError extends FooError {
+  override name = 'AError';}`,
+    },
+    // Without type info the grandchild is reported.
+    {
+      code: grandchild,
+      options: selfNamingBases,
+      errors: [{ messageId: 'missingName', data: { name: 'BError' } }],
+      output: grandchild.replace(
+        'class BError extends AError {}',
+        "class BError extends AError {\n  override name = 'BError';}",
+      ),
+    },
+  ],
+});
+
+typedRuleTester.run('error-class-sets-name (type information)', rule, {
+  valid: [
+    // The grandchild inherits from a listed base through AError.
+    { code: grandchild, filename: 'file.ts', options: selfNamingBases },
+  ],
+  invalid: [
+    // Type info present but no listed base in the chain.
+    {
+      code: 'class AError extends Error {}\nclass BError extends AError {}',
+      filename: 'file.ts',
+      options: selfNamingBases,
+      errors: [
+        { messageId: 'missingName', data: { name: 'AError' } },
+        { messageId: 'missingName', data: { name: 'BError' } },
+      ],
+      output: `class AError extends Error {
+  override name = 'AError';}
+class BError extends AError {
+  override name = 'BError';}`,
     },
   ],
 });
