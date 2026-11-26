@@ -47,4 +47,9 @@ export default tseslint.config(
       'preflight/no-unknown-parameters': 'off',
     },
   },
+  // Moving preflight's own imports onto a `#` imports map is its own migration, not bundled with the rule that asks for it.
+  {
+    files: ['src/**', 'tests/**'],
+    rules: { 'preflight/no-parent-relative-imports': 'off' },
+  },
 );
