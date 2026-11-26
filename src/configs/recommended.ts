@@ -1,3 +1,4 @@
+import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import importX from 'eslint-plugin-import-x';
 import type { ESLint, Linter } from 'eslint';
@@ -23,7 +24,10 @@ export const recommendedBuilder = {
           preflight,
           '@typescript-eslint': tsPlugin as unknown as ESLint.Plugin,
           'import-x': importX as unknown as ESLint.Plugin,
+          '@eslint-community/eslint-comments':
+            eslintComments as unknown as ESLint.Plugin,
         },
+        linterOptions: { reportUnusedDisableDirectives: 'error' },
         rules: {
           'preflight/service-shape': 'error',
           'preflight/constructor-single-props': 'error',
@@ -40,6 +44,16 @@ export const recommendedBuilder = {
           'preflight/no-unknown-returns': 'error',
           'preflight/no-unsafe-dictionary-type': 'error',
           'preflight/no-widen-then-assert': 'error',
+          'preflight/no-comments': 'error',
+          'max-lines': [
+            'error',
+            { max: 300, skipBlankLines: true, skipComments: true },
+          ],
+          'max-lines-per-function': [
+            'error',
+            { max: 60, skipBlankLines: true, skipComments: true },
+          ],
+          '@eslint-community/eslint-comments/require-description': 'error',
           'preflight/no-parent-relative-imports': 'error',
           'preflight/filename-matches-export': 'error',
           'preflight/no-env-outside-config': 'error',

@@ -18,6 +18,8 @@ ruleTester.run('require-safety-comment-for-type-assertion', rule, {
     'const id = /* SAFETY: Validation established the invariant. */ value as UserId;',
     // Spacing around the colon is tolerated.
     '// SAFETY : spacing is tolerated.\nconst id = value as UserId;',
+    // A multi-line block comment may lead with `*` before the note.
+    '/*\n * SAFETY: Validation established the invariant.\n */\nconst id = value as UserId;',
     // No assertion at all.
     'const id: UserId = parseUserId(value);',
   ],
@@ -33,6 +35,11 @@ ruleTester.run('require-safety-comment-for-type-assertion', rule, {
     // A comment that is not a SAFETY note does not count.
     {
       code: '// This cast seems fine.\nconst id = value as UserId;',
+      errors: [error],
+    },
+    // SAFETY: must lead the comment, not sit partway through it.
+    {
+      code: '// Checked above. SAFETY: the parser established it.\nconst id = value as UserId;',
       errors: [error],
     },
     // The search stops at the containing statement rather than climbing out of it.

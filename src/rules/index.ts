@@ -3,6 +3,7 @@ export { rule as 'constructor-single-props' } from './constructor-single-props.j
 export { rule as 'error-class-sets-name' } from './error-class-sets-name.js';
 export { rule as 'filename-matches-export' } from './filename-matches-export.js';
 export { rule as 'no-chained-type-assertions' } from './no-chained-type-assertions.js';
+export { rule as 'no-comments' } from './no-comments.js';
 export { rule as 'no-conditional-empty-object-spread' } from './no-conditional-empty-object-spread.js';
 export { rule as 'no-ecmascript-private' } from './no-ecmascript-private.js';
 export { rule as 'no-env-outside-config' } from './no-env-outside-config.js';
