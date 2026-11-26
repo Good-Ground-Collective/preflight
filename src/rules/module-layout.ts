@@ -1,4 +1,4 @@
-import { lintedFiles } from '../layout/linted-file.js';
+import { lintedFiles } from '../layout/linted-file-resolver.js';
 import type { ModuleLayoutMessageId } from '../layout/module-layout-checker.js';
 import { ModuleLayoutChecker } from '../layout/module-layout-checker.js';
 import type { ModuleLayoutOptions } from '../layout/module-layout-options.js';

@@ -1,4 +1,4 @@
-import { lintedFiles } from '../layout/linted-file.js';
+import { lintedFiles } from '../layout/linted-file-resolver.js';
 import { optionSchemas } from '../layout/option-schemas.js';
 import type { TestNameMessageId, TestNameOptions } from '../layout/test-name-checker.js';
 import { TestNameChecker } from '../layout/test-name-checker.js';

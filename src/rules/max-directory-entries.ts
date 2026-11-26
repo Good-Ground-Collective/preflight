@@ -1,5 +1,5 @@
 import { directories } from '../layout/directory-reader.js';
-import { lintedFiles } from '../layout/linted-file.js';
+import { lintedFiles } from '../layout/linted-file-resolver.js';
 import { sourceFileKinds } from '../layout/source-file-kinds.js';
 import { createRule } from '../utils.js';
 

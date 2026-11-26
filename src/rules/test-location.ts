@@ -1,4 +1,4 @@
-import { lintedFiles } from '../layout/linted-file.js';
+import { lintedFiles } from '../layout/linted-file-resolver.js';
 import { optionSchemas } from '../layout/option-schemas.js';
 import type {
   TestPlacementMessageId,
