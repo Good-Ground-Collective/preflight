@@ -44,6 +44,9 @@ const deterministicRules = [
   'preflight/no-reflect-apply',
   'preflight/no-reflect-get',
   'preflight/no-unknown-type-aliases',
+  'preflight/no-upward-imports',
+  'preflight/no-ecmascript-private',
+  'preflight/no-schema-field-comments',
 ];
 
 const stockGoNoGoRules = [
@@ -74,6 +77,9 @@ const recommendedOnlyRules = [
   'max-lines',
   'max-lines-per-function',
   '@eslint-community/eslint-comments/require-description',
+  'preflight/no-parent-relative-imports',
+  'preflight/filename-matches-export',
+  'preflight/no-env-outside-config',
 ];
 
 describe('go-no-go contents', () => {

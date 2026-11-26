@@ -54,6 +54,9 @@ export const recommendedBuilder = {
             { max: 60, skipBlankLines: true, skipComments: true },
           ],
           '@eslint-community/eslint-comments/require-description': 'error',
+          'preflight/no-parent-relative-imports': 'error',
+          'preflight/filename-matches-export': 'error',
+          'preflight/no-env-outside-config': 'error',
         },
       },
     ];
