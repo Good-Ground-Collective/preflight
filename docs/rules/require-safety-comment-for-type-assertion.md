@@ -17,8 +17,11 @@ definition, and stops there. A comment *after* the assertion does not count.
 
 `as const` is exempt — it asserts nothing about external evidence.
 
-The marker is matched as `SAFETY:` with optional surrounding whitespace, in
-either a line or a block comment.
+The comment must start with `SAFETY:`, in either a line or a block comment.
+Leading whitespace and `*` are ignored, and whitespace before the colon is
+allowed (`SAFETY :`). A `SAFETY:` partway through a comment does not count.
+This is the same matching [`no-comments`](./no-comments.md) uses for its
+`SAFETY:` prefix, so a note that satisfies one rule satisfies the other.
 
 ### Incorrect
 
@@ -30,6 +33,9 @@ const id = <UserId>value;
 const id = value as UserId; // a comment that is not a SAFETY note
 
 const id = value as UserId; // SAFETY: too late — the comment trails the assertion
+
+// Checked above. SAFETY: the note must lead the comment.
+const id = value as UserId;
 ```
 
 ### Correct

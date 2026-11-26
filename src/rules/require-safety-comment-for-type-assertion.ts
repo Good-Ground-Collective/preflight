@@ -1,10 +1,9 @@
 import type { TSESTree } from '@typescript-eslint/utils';
 import { AST_NODE_TYPES } from '@typescript-eslint/utils';
+import { safetyPrefix } from '../comment-prefix.js';
 import { createRule } from '../utils.js';
 
 type TypeAssertion = TSESTree.TSAsExpression | TSESTree.TSTypeAssertion;
-
-const safetyComment = /\bSAFETY\s*:/u;
 
 const commentOwners = new Set<string>([
   AST_NODE_TYPES.ExpressionStatement,
@@ -54,7 +53,7 @@ export const rule = createRule({
           .some(
             (comment) =>
               comment.range[1] <= node.range[0] &&
-              safetyComment.test(comment.value),
+              safetyPrefix.matches(comment),
           );
         if (justified) return true;
         if (

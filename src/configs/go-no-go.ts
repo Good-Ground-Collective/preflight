@@ -31,6 +31,7 @@ export const goNoGoBuilder = {
       languageOptions: {
         parser: tsParser as Linter.Parser,
       },
+      linterOptions: { reportUnusedDisableDirectives: 'error' },
       rules: {
         'preflight/no-loose-functions': 'error',
         'preflight/no-planning-identifiers': 'error',
@@ -44,6 +45,9 @@ export const goNoGoBuilder = {
         'preflight/no-reflect-apply': 'error',
         'preflight/no-reflect-get': 'error',
         'preflight/no-unknown-type-aliases': 'error',
+        'preflight/no-upward-imports': 'error',
+        'preflight/no-ecmascript-private': 'error',
+        'preflight/no-schema-field-comments': 'error',
         '@typescript-eslint/member-ordering': [
           'error',
           {

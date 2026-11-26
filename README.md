@@ -13,10 +13,11 @@ npm i -D @good-ground-collective/preflight \
   eslint \
   @typescript-eslint/eslint-plugin @typescript-eslint/parser \
   eslint-plugin-unicorn eslint-plugin-import-x \
+  @eslint-community/eslint-plugin-eslint-comments \
   typescript
 ```
 
-The extra packages are peer dependencies the shared configs wire in. (`eslint-plugin-import-x` is only used by the `recommended` config — skip it if you only use `go-no-go`.)
+The extra packages are peer dependencies the shared configs wire in. (`eslint-plugin-import-x` and `@eslint-community/eslint-plugin-eslint-comments` are only used by the `recommended` config — skip them if you only use `go-no-go`.)
 
 ## Quickstart
 
@@ -75,7 +76,7 @@ export default [
 
 ## Rules
 
-Every rule is prefixed `preflight/` and needs no type information. The **Set** column tells you where each rule lives:
+Every rule is prefixed `preflight/` and needs no type information. All are pure AST checks except `no-upward-imports`, which reads the nearest `package.json` to find the package root, and the four [layout rules](#layout-rules), which read the filesystem. The **Set** column tells you where each rule lives:
 
 - **go-no-go** — in the blocking `go-no-go` gate, and therefore also in `recommended`.
 - **recommended** — added by `recommended` only; heuristic or fuzzier, so it's kept out of the blocking gate.
@@ -91,6 +92,7 @@ Every rule is prefixed `preflight/` and needs no type information. The **Set** c
 | [`no-throw-helpers`](#no-throw-helpers) | go-no-go | No functions whose whole body is a `throw`. |
 | [`constructor-single-props`](#constructor-single-props) | recommended | Constructors take a single props object. |
 | [`service-shape`](#service-shape) | recommended | Services follow interface → class → singleton. |
+| [`no-comments`](#no-comments) | recommended | No comments except doc comments on declarations and tool directives. |
 | [`no-chained-type-assertions`](docs/rules/no-chained-type-assertions.md) | go-no-go | No `x as unknown as T` assertion chains. |
 | [`no-conditional-empty-object-spread`](docs/rules/no-conditional-empty-object-spread.md) | go-no-go | No `...(cond ? { a } : {})` to omit fields. |
 | [`no-known-value-widening`](docs/rules/no-known-value-widening.md) | recommended | No annotating a known value with a broader type. |
@@ -105,8 +107,14 @@ Every rule is prefixed `preflight/` and needs no type information. The **Set** c
 | [`no-unknown-type-aliases`](docs/rules/no-unknown-type-aliases.md) | go-no-go | No named aliases for `unknown`. |
 | [`no-unsafe-dictionary-type`](docs/rules/no-unsafe-dictionary-type.md) | recommended | No dictionaries with an escape-hatch value type. |
 | [`no-widen-then-assert`](docs/rules/no-widen-then-assert.md) | recommended | No widening a known value then asserting it back. |
-| [`require-safety-comment-for-type-assertion`](docs/rules/require-safety-comment-for-type-assertion.md) | recommended | Every assertion needs a `SAFETY:` note. |
+| [`require-safety-comment-for-type-assertion`](docs/rules/require-safety-comment-for-type-assertion.md) | recommended | Every assertion needs a comment starting `SAFETY:`. |
 | [`no-service-constructor-imports`](docs/rules/no-service-constructor-imports.md) | recommended | No project-local `make<Capability>` imports in runtime code. |
+| [`no-upward-imports`](docs/rules/no-upward-imports.md) | go-no-go | No relative import that leaves the package root. |
+| [`no-parent-relative-imports`](docs/rules/no-parent-relative-imports.md) | recommended | No `../`. Import across folders through a `#alias/` subpath. |
+| [`no-ecmascript-private`](docs/rules/no-ecmascript-private.md) | go-no-go | TypeScript `private`, never `#field`. |
+| [`filename-matches-export`](docs/rules/filename-matches-export.md) | recommended | A file's exported class is named for the file. |
+| [`no-schema-field-comments`](docs/rules/no-schema-field-comments.md) | go-no-go | No comments on `z.object` fields. Use `.describe()` / `.meta()`. |
+| [`no-env-outside-config`](docs/rules/no-env-outside-config.md) | recommended | `process.env` is read only in config files. |
 | [`module-layout`](docs/rules/module-layout.md) | layout | Folders follow module → role → concept. Configurable. |
 | [`test-location`](docs/rules/test-location.md) | layout | Tests sit in a `__tests__/` beside the code. No repo-level test tree. |
 | [`test-file-naming`](docs/rules/test-file-naming.md) | layout | `<source>.test.ts` / `<name>.integration.test.ts`; no `.spec`. |
@@ -255,6 +263,21 @@ function createFoo() { return { do() {} }; } // ✗
 
 [Full docs →](./docs/rules/service-shape.md)
 
+#### no-comments
+
+**Set: recommended · has options.** Reports every comment except a `/** */` doc comment directly before a declaration (class, interface, type alias, function, enum, variable, class member, interface or type-literal member, object-literal property, or an `export` wrapping one) and directives: comments starting with an entry of `allowPrefixes` (`eslint-disable`, `eslint-enable`, `@ts-expect-error`, `@ts-ignore`, `prettier-ignore`, `c8 ignore`, `v8 ignore`, `istanbul ignore`, `SAFETY:`) or `additionalPrefixes` (for annotations other rules require, such as `raw-sql:`). ESLint inline config (`/* eslint … */`, `/* global */`), triple-slash directives and shebangs always pass. A `/** */` floating in a function body is reported, so doc syntax can't slip a comment through. Report-only.
+
+`no-comments` makes `no-paragraph-comments` redundant inside `recommended`; the latter stays in `go-no-go` for repos that don't adopt `recommended`. Code with heavy narrative commenting needs a cleanup or a temporary `files` override when adopting it.
+
+```ts
+const timeout = 30; // seconds ✗
+
+/** Unique across tenants. */
+id: string; // ✓ — on an interface property
+```
+
+[Full docs →](./docs/rules/no-comments.md)
+
 ### Layout rules
 
 `module-layout`, `test-location`, `test-file-naming` and `max-directory-entries` check where files sit, not what they contain. Unlike every other preflight rule, they **read the filesystem**: each one looks at the folders around the linted file (the nearest `package.json` marks the package root) and reads them fresh on every file, so they stay correct in a long-running editor session. They report once per file, at line 1.
@@ -283,7 +306,7 @@ export default [
 
 ### Also enforced by the presets
 
-Beyond the `preflight/` rules, both shared configs turn on a few third-party rules: `@typescript-eslint/member-ordering`, `@typescript-eslint/naming-convention`, and `unicorn/filename-case` in `go-no-go`, plus `@typescript-eslint/consistent-type-imports`, `@typescript-eslint/no-explicit-any`, and `import-x/no-default-export` in `recommended`. See the config source for the exact settings.
+Beyond the `preflight/` rules, both shared configs turn on a few third-party rules: `@typescript-eslint/member-ordering`, `@typescript-eslint/naming-convention`, and `unicorn/filename-case` in `go-no-go`, plus `@typescript-eslint/consistent-type-imports`, `@typescript-eslint/no-explicit-any`, `import-x/no-default-export`, `max-lines` (300, skipping blank lines and comments), `max-lines-per-function` (60, same skips) and `@eslint-community/eslint-comments/require-description` (every `eslint-disable` needs a `-- reason`) in `recommended`. Both configs set `linterOptions.reportUnusedDisableDirectives: 'error'`, so a stale `eslint-disable` fails the lint. See the config source for the exact settings.
 
 #### Member order
 

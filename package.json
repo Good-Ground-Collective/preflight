@@ -44,6 +44,7 @@
     "build": "tsup"
   },
   "peerDependencies": {
+    "@eslint-community/eslint-plugin-eslint-comments": ">=4.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": ">=9.0.0",
@@ -58,6 +59,7 @@
     "@typescript-eslint/utils": "^8.64.0"
   },
   "devDependencies": {
+    "@eslint-community/eslint-plugin-eslint-comments": "^4.8.1",
     "@types/node": "^26.1.1",
     "@typescript-eslint/eslint-plugin": "^8.64.0",
     "@typescript-eslint/parser": "^8.64.0",

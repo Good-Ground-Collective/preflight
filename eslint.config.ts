@@ -47,4 +47,24 @@ export default tseslint.config(
       'preflight/no-unknown-parameters': 'off',
     },
   },
+  // Preflight's own source predates no-comments and the size limits; adopting them is a separate migration.
+  {
+    files: [
+      'src/**',
+      'tests/**',
+      'eslint.config.ts',
+      'tsup.config.ts',
+      'vitest.config.ts',
+    ],
+    rules: {
+      'preflight/no-comments': 'off',
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+    },
+  },
+  // Moving preflight's own imports onto a `#` imports map is its own migration, not bundled with the rule that asks for it.
+  {
+    files: ['src/**', 'tests/**'],
+    rules: { 'preflight/no-parent-relative-imports': 'off' },
+  },
 );
