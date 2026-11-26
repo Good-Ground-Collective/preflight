@@ -1,6 +1,8 @@
 // Rule modules keyed by their short name; keep exports alphabetized.
 export { rule as 'constructor-single-props' } from './constructor-single-props.js';
 export { rule as 'error-class-sets-name' } from './error-class-sets-name.js';
+export { rule as 'max-directory-entries' } from './max-directory-entries.js';
+export { rule as 'module-layout' } from './module-layout.js';
 export { rule as 'no-chained-type-assertions' } from './no-chained-type-assertions.js';
 export { rule as 'no-conditional-empty-object-spread' } from './no-conditional-empty-object-spread.js';
 export { rule as 'no-known-value-widening' } from './no-known-value-widening.js';
@@ -23,3 +25,5 @@ export { rule as 'no-unsafe-dictionary-type' } from './no-unsafe-dictionary-type
 export { rule as 'no-widen-then-assert' } from './no-widen-then-assert.js';
 export { rule as 'require-safety-comment-for-type-assertion' } from './require-safety-comment-for-type-assertion.js';
 export { rule as 'service-shape' } from './service-shape.js';
+export { rule as 'test-file-naming' } from './test-file-naming.js';
+export { rule as 'test-location' } from './test-location.js';

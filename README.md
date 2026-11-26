@@ -2,7 +2,7 @@
 
 ESLint plugin enforcing the coding charter — nit-level review feedback, caught before the PR.
 
-Flat-config only (ESLint 9+). Every rule is a pure AST check, so no type-aware setup (`parserOptions.project`) is required.
+Flat-config only (ESLint 9+). No rule needs type-aware setup (`parserOptions.project`). Every rule in `go-no-go` and `recommended` is a pure AST check; the opt-in `layout` rules also read the filesystem.
 
 ## Install
 
@@ -26,6 +26,7 @@ The plugin ships four ready-made flat configs, all arrays you spread into your c
 | --- | --- |
 | `go-no-go` | The blocking gate. Every rule is an `error` and the set is kept free of false-positive-prone rules — safe to fail a build on. |
 | `recommended` | A superset of `go-no-go` plus the fuzzier, nice-to-have rules. |
+| `layout` | Opt-in folder-layout rules that read the filesystem and need per-repo options. Not part of the other two. See [Layout rules](#layout-rules). |
 
 ### New config (only these rules)
 
@@ -74,10 +75,11 @@ export default [
 
 ## Rules
 
-Every rule is prefixed `preflight/` and is a pure AST check (no type information required). The **Set** column tells you where each rule lives:
+Every rule is prefixed `preflight/` and needs no type information. The **Set** column tells you where each rule lives:
 
 - **go-no-go** — in the blocking `go-no-go` gate, and therefore also in `recommended`.
 - **recommended** — added by `recommended` only; heuristic or fuzzier, so it's kept out of the blocking gate.
+- **layout** — in the opt-in `layout` config only; reads the filesystem.
 
 | Rule | Set | What it does |
 | --- | --- | --- |
@@ -105,6 +107,10 @@ Every rule is prefixed `preflight/` and is a pure AST check (no type information
 | [`no-widen-then-assert`](docs/rules/no-widen-then-assert.md) | recommended | No widening a known value then asserting it back. |
 | [`require-safety-comment-for-type-assertion`](docs/rules/require-safety-comment-for-type-assertion.md) | recommended | Every assertion needs a `SAFETY:` note. |
 | [`no-service-constructor-imports`](docs/rules/no-service-constructor-imports.md) | recommended | No project-local `make<Capability>` imports in runtime code. |
+| [`module-layout`](docs/rules/module-layout.md) | layout | Folders follow module → role → concept. Configurable. |
+| [`test-location`](docs/rules/test-location.md) | layout | Tests sit in a `__tests__/` beside the code. No repo-level test tree. |
+| [`test-file-naming`](docs/rules/test-file-naming.md) | layout | `<source>.test.ts` / `<name>.integration.test.ts`; no `.spec`. |
+| [`max-directory-entries`](docs/rules/max-directory-entries.md) | layout | A folder holding more than N source files has to be split. |
 
 ### Anti-slop rules
 
@@ -248,6 +254,32 @@ function createFoo() { return { do() {} }; } // ✗
 ```
 
 [Full docs →](./docs/rules/service-shape.md)
+
+### Layout rules
+
+`module-layout`, `test-location`, `test-file-naming` and `max-directory-entries` check where files sit, not what they contain. Unlike every other preflight rule, they **read the filesystem**: each one looks at the folders around the linted file (the nearest `package.json` marks the package root) and reads them fresh on every file, so they stay correct in a long-running editor session. They report once per file, at line 1.
+
+Because folder conventions differ between repos, these rules live in their own opt-in `layout` config and are never part of `go-no-go` or `recommended`. **Each repo has to configure them.** `module-layout` does nothing until it is given options; the other three run with the defaults shown in their docs.
+
+```js
+import preflight from '@good-ground-collective/preflight';
+
+export default [
+  ...preflight.configs.recommended,
+  ...preflight.configs.layout,
+  {
+    rules: {
+      'preflight/module-layout': ['error', {
+        ...preflight.layouts.module, // or preflight.layouts.slice
+        topLevel: { dirs: ['packages', 'config'], files: ['index.ts'] },
+      }],
+      'preflight/test-file-naming': ['error', { module: { marker: '*-module.ts' } }],
+    },
+  },
+];
+```
+
+`preflight.layouts.module` is the full module → role → concept layout and `preflight.layouts.slice` is the lighter slice → `models/` / `services/` / `definitions/` layout. Both are plain option objects, so spread one and override what differs. See [`module-layout`](docs/rules/module-layout.md) for every option.
 
 ### Also enforced by the presets
 

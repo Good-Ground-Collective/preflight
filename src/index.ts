@@ -2,13 +2,15 @@ import { readFileSync } from 'node:fs';
 import type { ESLint } from 'eslint';
 import * as rules from './rules/index.js';
 import { goNoGoBuilder } from './configs/go-no-go.js';
+import { layoutBuilder } from './configs/layout.js';
 import { recommendedBuilder } from './configs/recommended.js';
+import { layouts } from './layout/layout-presets.js';
 
 const pkg = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
 ) as { name: string; version: string };
 
-const plugin: ESLint.Plugin = {
+const plugin: ESLint.Plugin & { layouts: typeof layouts } = {
   meta: {
     name: pkg.name,
     version: pkg.version,
@@ -17,6 +19,7 @@ const plugin: ESLint.Plugin = {
   // TSESLint's RuleModule is runtime-compatible with ESLint core's RuleDefinition but not assignable to it.
   rules: { ...rules } as unknown as ESLint.Plugin['rules'],
   configs: {},
+  layouts,
 };
 
 // Assigned after declaration so the configs can reference the plugin itself.
@@ -25,6 +28,7 @@ const goNoGo = goNoGoBuilder.build(plugin);
 Object.assign(plugin.configs!, {
   'go-no-go': goNoGo,
   recommended: recommendedBuilder.build(plugin, goNoGo),
+  layout: layoutBuilder.build(plugin),
 });
 
 // eslint-disable-next-line import-x/no-default-export -- flat-config consumers import the plugin object as the module default
