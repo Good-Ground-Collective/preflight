@@ -42,7 +42,7 @@ services/schedule/__tests__/schedule-builder.integration.test.ts
 'preflight/test-file-naming': ['error', {
   suffixes: ['test', 'integration.test', 'e2e.test'],
   matchSource: 'concept',
-  module: { marker: '*-module.ts' },
+  module: { marker: 'module.ts' },
 }]
 ```
 

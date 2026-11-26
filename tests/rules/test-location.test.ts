@@ -6,7 +6,7 @@ const ruleTester = new RuleTester();
 const code = 'export {};';
 const tree = new TempTree({
   files: [
-    'src/audit/audit-module.ts',
+    'src/audit/module.ts',
     'src/audit/services/schedule/schedule-builder.ts',
     'src/empty/__tests__/orphan.test.ts',
   ],

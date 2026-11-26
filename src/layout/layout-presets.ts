@@ -2,9 +2,9 @@ import type { ModuleLayoutOptions } from './module-layout-options.js';
 
 const modulePreset: ModuleLayoutOptions = {
   root: 'src',
-  module: { marker: '*-module.ts' },
+  module: { marker: 'module.ts' },
   moduleRoot: {
-    files: ['<module>-module.ts', 'urls.ts', 'events.ts', 'permissions.ts', 'errors.ts'],
+    files: ['module.ts', 'errors.ts'],
     dirs: ['contracts', '__tests__'],
   },
   roles: [

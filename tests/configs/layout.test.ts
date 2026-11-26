@@ -52,7 +52,7 @@ describe('module-layout reads the disk on every lint', () => {
       linter.verify('export {};', config, { filename }).map((message) => message.messageId);
 
     expect(lint()).toEqual(['topLevelDir']);
-    writeFileSync(tree.at('src/audit/audit-module.ts'), '');
+    writeFileSync(tree.at('src/audit/module.ts'), '');
     expect(lint()).toEqual(['flatFile']);
   });
 });

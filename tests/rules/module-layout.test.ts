@@ -8,8 +8,9 @@ const code = 'export {};';
 const tree = new TempTree({
   files: [
     'src/index.ts',
-    'src/audit/audit-module.ts',
-    'src/audit/scheduling/scheduling-module.ts',
+    'src/audit/module.ts',
+    'src/audit/scheduling/module.ts',
+    'src/legacy/legacy-module.ts',
     'src/plain/loose.ts',
     'src/features/billing/index.ts',
   ],
@@ -18,9 +19,9 @@ const options = [
   {
     root: 'src',
     topLevel: { dirs: ['audit', 'features', 'config'], files: ['index.ts'] },
-    module: { marker: '*-module.ts' },
+    module: { marker: 'module.ts' },
     moduleRoot: {
-      files: ['<module>-module.ts', 'errors.ts'],
+      files: ['errors.ts'],
       dirs: ['contracts', '__tests__'],
     },
     roles: ['models', 'services'],
@@ -38,7 +39,7 @@ ruleTester.run('module-layout', rule, {
     { code, filename: tree.at('src/config/env.ts'), options },
     // Files outside root are not checked.
     { code, filename: tree.at('scripts/build.ts'), options },
-    { code, filename: tree.at('src/audit/audit-module.ts'), options },
+    { code, filename: tree.at('src/audit/module.ts'), options },
     { code, filename: tree.at('src/audit/errors.ts'), options },
     { code, filename: tree.at('src/audit/contracts/audit-contract.ts'), options },
     { code, filename: tree.at('src/audit/__tests__/audit.integration.test.ts'), options },
@@ -49,13 +50,19 @@ ruleTester.run('module-layout', rule, {
       options,
     },
     // A submodule follows the same layout from its own root.
-    { code, filename: tree.at('src/audit/scheduling/scheduling-module.ts'), options },
+    { code, filename: tree.at('src/audit/scheduling/module.ts'), options },
     { code, filename: tree.at('src/audit/scheduling/models/slot/slot.ts'), options },
     // The marker file name is always allowed at a module root.
     {
       code,
-      filename: tree.at('src/audit/audit-module.ts'),
-      options: [{ module: { marker: '*-module.ts' }, moduleRoot: { files: [] } }],
+      filename: tree.at('src/audit/module.ts'),
+      options: [{ module: { marker: 'module.ts' }, moduleRoot: { files: [] } }],
+    },
+    // A custom marker glob, with `<module>` standing for the module folder's name.
+    {
+      code,
+      filename: tree.at('src/legacy/legacy-errors.ts'),
+      options: [{ module: { marker: '*-module.ts' }, moduleRoot: { files: ['<module>-errors.ts'] } }],
     },
     // The slice preset: no concept folders.
     { code, filename: tree.at('src/billing/index.ts'), options: [plugin.layouts.slice] },
@@ -96,7 +103,7 @@ ruleTester.run('module-layout', rule, {
           data: {
             file: 'schedule-builder.ts',
             module: 'audit',
-            allowed: 'audit-module.ts, errors.ts, *-module.ts',
+            allowed: 'errors.ts, module.ts',
             expected: '<role>/<concept>/schedule-builder.ts',
           },
         },

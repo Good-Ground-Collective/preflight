@@ -273,13 +273,13 @@ export default [
         ...preflight.layouts.module, // or preflight.layouts.slice
         topLevel: { dirs: ['packages', 'config'], files: ['index.ts'] },
       }],
-      'preflight/test-file-naming': ['error', { module: { marker: '*-module.ts' } }],
+      'preflight/test-file-naming': ['error', { module: { marker: 'module.ts' } }],
     },
   },
 ];
 ```
 
-`preflight.layouts.module` is the full module → role → concept layout and `preflight.layouts.slice` is the lighter slice → `models/` / `services/` / `definitions/` layout. Both are plain option objects, so spread one and override what differs. See [`module-layout`](docs/rules/module-layout.md) for every option.
+`preflight.layouts.module` is the full module → role → concept layout, where a module is any folder holding a file named exactly `module.ts` (override with `module.marker` or `module.match`), and `preflight.layouts.slice` is the lighter slice → `models/` / `services/` / `definitions/` layout. Both are plain option objects, so spread one and override what differs. See [`module-layout`](docs/rules/module-layout.md) for every option.
 
 ### Also enforced by the presets
 

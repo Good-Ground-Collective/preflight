@@ -6,12 +6,12 @@ const ruleTester = new RuleTester();
 const code = 'export {};';
 const tree = new TempTree({
   files: [
-    'src/audit/audit-module.ts',
+    'src/audit/module.ts',
     'src/audit/services/schedule/schedule-builder.ts',
     'src/audit/services/schedule/slot-picker.tsx',
   ],
 });
-const withModules = [{ module: { marker: '*-module.ts' } }] as const;
+const withModules = [{ module: { marker: 'module.ts' } }] as const;
 const line1 = { line: 1, column: 1 };
 
 ruleTester.run('test-file-naming', rule, {
