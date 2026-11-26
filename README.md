@@ -13,10 +13,11 @@ npm i -D @good-ground-collective/preflight \
   eslint \
   @typescript-eslint/eslint-plugin @typescript-eslint/parser \
   eslint-plugin-unicorn eslint-plugin-import-x \
+  @eslint-community/eslint-plugin-eslint-comments \
   typescript
 ```
 
-The extra packages are peer dependencies the shared configs wire in. (`eslint-plugin-import-x` is only used by the `recommended` config — skip it if you only use `go-no-go`.)
+The extra packages are peer dependencies the shared configs wire in. (`eslint-plugin-import-x` and `@eslint-community/eslint-plugin-eslint-comments` are only used by the `recommended` config — skip them if you only use `go-no-go`.)
 
 ## Quickstart
 
@@ -89,6 +90,7 @@ Every rule is prefixed `preflight/` and is a pure AST check (no type information
 | [`no-throw-helpers`](#no-throw-helpers) | go-no-go | No functions whose whole body is a `throw`. |
 | [`constructor-single-props`](#constructor-single-props) | recommended | Constructors take a single props object. |
 | [`service-shape`](#service-shape) | recommended | Services follow interface → class → singleton. |
+| [`no-comments`](#no-comments) | recommended | No comments except doc comments on declarations and tool directives. |
 | [`no-chained-type-assertions`](docs/rules/no-chained-type-assertions.md) | go-no-go | No `x as unknown as T` assertion chains. |
 | [`no-conditional-empty-object-spread`](docs/rules/no-conditional-empty-object-spread.md) | go-no-go | No `...(cond ? { a } : {})` to omit fields. |
 | [`no-known-value-widening`](docs/rules/no-known-value-widening.md) | recommended | No annotating a known value with a broader type. |
@@ -249,9 +251,24 @@ function createFoo() { return { do() {} }; } // ✗
 
 [Full docs →](./docs/rules/service-shape.md)
 
+#### no-comments
+
+**Set: recommended · has options.** Reports every comment except a `/** */` doc comment directly before a declaration (class, interface, type alias, function, enum, variable, class member, interface or type-literal member, object-literal property, or an `export` wrapping one) and directives: comments starting with an entry of `allowPrefixes` (`eslint-disable`, `eslint-enable`, `@ts-expect-error`, `@ts-ignore`, `prettier-ignore`, `c8 ignore`, `v8 ignore`, `istanbul ignore`, `SAFETY:`) or `additionalPrefixes` (for annotations other rules require, such as `raw-sql:`). ESLint inline config (`/* eslint … */`, `/* global */`), triple-slash directives and shebangs always pass. A `/** */` floating in a function body is reported, so doc syntax can't slip a comment through. Report-only.
+
+`no-comments` makes `no-paragraph-comments` redundant inside `recommended`; the latter stays in `go-no-go` for repos that don't adopt `recommended`. Code with heavy narrative commenting needs a cleanup or a temporary `files` override when adopting it.
+
+```ts
+const timeout = 30; // seconds ✗
+
+/** Unique across tenants. */
+id: string; // ✓ — on an interface property
+```
+
+[Full docs →](./docs/rules/no-comments.md)
+
 ### Also enforced by the presets
 
-Beyond the `preflight/` rules, both shared configs turn on a few third-party rules: `@typescript-eslint/member-ordering`, `@typescript-eslint/naming-convention`, and `unicorn/filename-case` in `go-no-go`, plus `@typescript-eslint/consistent-type-imports`, `@typescript-eslint/no-explicit-any`, and `import-x/no-default-export` in `recommended`. See the config source for the exact settings.
+Beyond the `preflight/` rules, both shared configs turn on a few third-party rules: `@typescript-eslint/member-ordering`, `@typescript-eslint/naming-convention`, and `unicorn/filename-case` in `go-no-go`, plus `@typescript-eslint/consistent-type-imports`, `@typescript-eslint/no-explicit-any`, `import-x/no-default-export`, `max-lines` (300, skipping blank lines and comments), `max-lines-per-function` (60, same skips) and `@eslint-community/eslint-comments/require-description` (every `eslint-disable` needs a `-- reason`) in `recommended`. Both configs set `linterOptions.reportUnusedDisableDirectives: 'error'`, so a stale `eslint-disable` fails the lint. See the config source for the exact settings.
 
 #### Member order
 

@@ -31,6 +31,7 @@ export const goNoGoBuilder = {
       languageOptions: {
         parser: tsParser as Linter.Parser,
       },
+      linterOptions: { reportUnusedDisableDirectives: 'error' },
       rules: {
         'preflight/no-loose-functions': 'error',
         'preflight/no-planning-identifiers': 'error',

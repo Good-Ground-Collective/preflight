@@ -70,6 +70,10 @@ const recommendedOnlyRules = [
   'preflight/no-unsafe-dictionary-type',
   'preflight/no-widen-then-assert',
   'preflight/require-safety-comment-for-type-assertion',
+  'preflight/no-comments',
+  'max-lines',
+  'max-lines-per-function',
+  '@eslint-community/eslint-comments/require-description',
 ];
 
 describe('go-no-go contents', () => {
