@@ -29,6 +29,7 @@ const flattenRules = (configs: Linter.Config[]): Map<string, Severity> => {
 const configs = plugin.configs as Record<string, Linter.Config[]>;
 const goNoGo = flattenRules(configs['go-no-go']!);
 const recommended = flattenRules(configs['recommended']!);
+const layout = flattenRules(configs['layout']!);
 
 const deterministicRules = [
   'preflight/no-loose-functions',
@@ -122,15 +123,15 @@ describe('recommended ⊇ go-no-go (mechanical superset)', () => {
 });
 
 describe('every rule ships in a config', () => {
-  it('places each exported rule in go-no-go or recommended', () => {
-    const shipped = new Set([...goNoGo.keys(), ...recommended.keys()]);
+  it('places each exported rule in go-no-go, recommended or layout', () => {
+    const shipped = new Set([...goNoGo.keys(), ...recommended.keys(), ...layout.keys()]);
     const orphans = Object.keys(ruleModules)
       .map((name) => `preflight/${name}`)
       .filter((rule) => !shipped.has(rule));
     expect(orphans).toEqual([]);
   });
 
-  it('exposes exactly the two config groups', () => {
-    expect(Object.keys(configs).sort()).toEqual(['go-no-go', 'recommended']);
+  it('exposes exactly the three config groups', () => {
+    expect(Object.keys(configs).sort()).toEqual(['go-no-go', 'layout', 'recommended']);
   });
 });
