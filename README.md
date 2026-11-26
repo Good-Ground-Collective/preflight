@@ -74,7 +74,7 @@ export default [
 
 ## Rules
 
-Every rule is prefixed `preflight/` and is a pure AST check (no type information required). The **Set** column tells you where each rule lives:
+Every rule is prefixed `preflight/` and needs no type information. All are pure AST checks except `no-upward-imports`, which reads the nearest `package.json` to find the package root. The **Set** column tells you where each rule lives:
 
 - **go-no-go** — in the blocking `go-no-go` gate, and therefore also in `recommended`.
 - **recommended** — added by `recommended` only; heuristic or fuzzier, so it's kept out of the blocking gate.
@@ -105,6 +105,12 @@ Every rule is prefixed `preflight/` and is a pure AST check (no type information
 | [`no-widen-then-assert`](docs/rules/no-widen-then-assert.md) | recommended | No widening a known value then asserting it back. |
 | [`require-safety-comment-for-type-assertion`](docs/rules/require-safety-comment-for-type-assertion.md) | recommended | Every assertion needs a `SAFETY:` note. |
 | [`no-service-constructor-imports`](docs/rules/no-service-constructor-imports.md) | recommended | No project-local `make<Capability>` imports in runtime code. |
+| [`no-upward-imports`](docs/rules/no-upward-imports.md) | go-no-go | No relative import that leaves the package root. |
+| [`no-parent-relative-imports`](docs/rules/no-parent-relative-imports.md) | recommended | No `../`. Import across folders through a `#alias/` subpath. |
+| [`no-ecmascript-private`](docs/rules/no-ecmascript-private.md) | go-no-go | TypeScript `private`, never `#field`. |
+| [`filename-matches-export`](docs/rules/filename-matches-export.md) | recommended | A file's exported class is named for the file. |
+| [`no-schema-field-comments`](docs/rules/no-schema-field-comments.md) | go-no-go | No comments on `z.object` fields. Use `.describe()` / `.meta()`. |
+| [`no-env-outside-config`](docs/rules/no-env-outside-config.md) | recommended | `process.env` is read only in config files. |
 
 ### Anti-slop rules
 

@@ -40,6 +40,9 @@ export const recommendedBuilder = {
           'preflight/no-unknown-returns': 'error',
           'preflight/no-unsafe-dictionary-type': 'error',
           'preflight/no-widen-then-assert': 'error',
+          'preflight/no-parent-relative-imports': 'error',
+          'preflight/filename-matches-export': 'error',
+          'preflight/no-env-outside-config': 'error',
         },
       },
     ];
