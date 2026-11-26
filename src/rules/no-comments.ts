@@ -1,5 +1,6 @@
 import { AST_NODE_TYPES, AST_TOKEN_TYPES } from '@typescript-eslint/utils';
 import type { TSESTree } from '@typescript-eslint/utils';
+import { CommentPrefix } from '../comment-prefix.js';
 import { createRule } from '../utils.js';
 
 type Options = [{ allowPrefixes?: string[]; additionalPrefixes?: string[] }];
@@ -94,14 +95,8 @@ export const rule = createRule<Options, 'comment' | 'floatingDocComment'>({
     [{ allowPrefixes = defaultAllowPrefixes, additionalPrefixes = [] }],
   ) {
     const { sourceCode } = context;
-    const matchers = [...allowPrefixes, ...additionalPrefixes].map(
-      (prefix) =>
-        new RegExp(
-          `^${prefix
-            .replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')
-            .replace(/:$/u, '\\s*:')}`,
-          'u',
-        ),
+    const prefixes = [...allowPrefixes, ...additionalPrefixes].map(
+      (prefix) => new CommentPrefix({ prefix }),
     );
 
     const isShebang = (comment: TSESTree.Comment): boolean =>
@@ -114,10 +109,9 @@ export const rule = createRule<Options, 'comment' | 'floatingDocComment'>({
       ) {
         return true;
       }
-      const text = comment.value.replace(/^[\s*]+/u, '');
       return (
         eslintInlineConfig.test(comment.value.trim()) ||
-        matchers.some((matcher) => matcher.test(text))
+        prefixes.some((prefix) => prefix.matches(comment))
       );
     };
 

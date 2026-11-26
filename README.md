@@ -105,7 +105,7 @@ Every rule is prefixed `preflight/` and is a pure AST check (no type information
 | [`no-unknown-type-aliases`](docs/rules/no-unknown-type-aliases.md) | go-no-go | No named aliases for `unknown`. |
 | [`no-unsafe-dictionary-type`](docs/rules/no-unsafe-dictionary-type.md) | recommended | No dictionaries with an escape-hatch value type. |
 | [`no-widen-then-assert`](docs/rules/no-widen-then-assert.md) | recommended | No widening a known value then asserting it back. |
-| [`require-safety-comment-for-type-assertion`](docs/rules/require-safety-comment-for-type-assertion.md) | recommended | Every assertion needs a `SAFETY:` note. |
+| [`require-safety-comment-for-type-assertion`](docs/rules/require-safety-comment-for-type-assertion.md) | recommended | Every assertion needs a comment starting `SAFETY:`. |
 | [`no-service-constructor-imports`](docs/rules/no-service-constructor-imports.md) | recommended | No project-local `make<Capability>` imports in runtime code. |
 
 ### Anti-slop rules

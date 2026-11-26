@@ -30,10 +30,9 @@ and refactors keep them attached. Everything else drifts out of date.
 - Comments whose text starts with an allowed prefix (see Options). Leading
   whitespace and, in block comments, leading `*` are ignored when matching.
   A prefix ending in `:` also matches with whitespace before the colon, so
-  `// SAFETY : …` passes here exactly as it does for
-  [`require-safety-comment-for-type-assertion`](./require-safety-comment-for-type-assertion.md).
-  That rule accepts a `SAFETY:` note anywhere in the comment; this one needs it
-  first, so write the note as `// SAFETY: …` to satisfy both.
+  `// SAFETY : …` passes. Both this rule and
+  [`require-safety-comment-for-type-assertion`](./require-safety-comment-for-type-assertion.md)
+  use the same matching, so a `SAFETY:` note one accepts the other accepts.
 - ESLint's own inline config comments, whatever the options say:
   `eslint-disable*`, `eslint-enable`, `eslint-env`, `/* eslint rule: … */`,
   `/* global */`, `/* globals */` and `/* exported */`.
