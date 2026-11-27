@@ -1,0 +1,121 @@
+version: "2"
+
+run:
+  relative-path-mode: gitroot
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  uniq-by-line: false
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - containedctx
+    - copyloopvar
+    - depguard
+    - errcheck
+    - errname
+    - errorlint
+    - gochecknoinits
+    - gocritic
+    - govet
+    - ineffassign
+    - ireturn
+    - modernize
+    - nakedret
+    - nilerr
+    - noctx
+    - nolintlint
+    - revive
+    - sloglint
+    - staticcheck
+    - thelper
+    - unused
+    - usestdlibvars
+
+  settings:
+    depguard:
+      rules:
+        superseded:
+          list-mode: lax
+          deny:
+            - pkg: "io/ioutil"
+              desc: "use io and os"
+            - pkg: "math/rand$"
+              desc: "use math/rand/v2"
+            - pkg: "log$"
+              desc: "use log/slog"
+            - pkg: "github.com/pkg/errors"
+              desc: "use the standard errors package and fmt.Errorf with %w"
+            - pkg: "golang.org/x/exp/slices"
+              desc: "use the standard slices package"
+            - pkg: "golang.org/x/exp/maps"
+              desc: "use the standard maps package"
+            - pkg: "github.com/sirupsen/logrus"
+              desc: "use log/slog"
+            - pkg: "go.uber.org/zap"
+              desc: "use log/slog"
+            - pkg: "github.com/rs/zerolog"
+              desc: "use log/slog"
+        tests:
+          list-mode: lax
+          files:
+            - "$test"
+          deny:
+            - pkg: "github.com/stretchr/testify"
+              desc: "use the testing package and github.com/google/go-cmp/cmp"
+            - pkg: "gotest.tools"
+              desc: "use the testing package and github.com/google/go-cmp/cmp"
+            - pkg: "github.com/onsi/gomega"
+              desc: "use the testing package and github.com/google/go-cmp/cmp"
+            - pkg: "github.com/onsi/ginkgo"
+              desc: "use the testing package with table-driven subtests"
+            - pkg: "github.com/golang/mock"
+              desc: "write a small fake by hand"
+            - pkg: "go.uber.org/mock"
+              desc: "write a small fake by hand"
+            - pkg: "github.com/vektra/mockery"
+              desc: "write a small fake by hand"
+
+    gocritic:
+      disable-all: true
+      enabled-checks:
+        - commentedOutCode
+
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+
+    revive:
+      rules:
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: early-return
+        - name: error-return
+        - name: exported
+        - name: indent-error-flow
+        - name: package-comments
+        - name: receiver-naming
+        - name: superfluous-else
+        - name: unexported-return
+
+    sloglint:
+      context: scope
+
+    staticcheck:
+      checks:
+        - all
+        - -ST1000
+        - -ST1020
+        - -ST1021
+        - -ST1022
+
+  exclusions:
+    generated: lax
