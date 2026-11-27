@@ -2,7 +2,7 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
-want_bad="bodyclose containedctx depguard gochecknoinits gocritic ireturn modernize noctx revive staticcheck"
+want_bad="bodyclose containedctx depguard errcheck gochecknoinits gocritic ireturn modernize noctx revive staticcheck"
 failed=0
 
 for preset in go-no-go recommended; do

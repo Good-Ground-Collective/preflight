@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"os"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,6 +20,7 @@ var cache = map[string]string{}
 
 func init() {
 	cache["boot"] = "yes"
+	os.Remove("boot.lock")
 }
 
 func NewUserService() UserServiceInterface {
