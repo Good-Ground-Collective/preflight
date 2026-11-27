@@ -1,0 +1,155 @@
+version: "2"
+
+run:
+  relative-path-mode: gitroot
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  uniq-by-line: false
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - copyloopvar
+    - depguard
+    - dupword
+    - err113
+    - errcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - gochecknoglobals
+    - gochecknoinits
+    - gocritic
+    - govet
+    - iface
+    - ineffassign
+    - ireturn
+    - misspell
+    - modernize
+    - nakedret
+    - nilerr
+    - nilnil
+    - noctx
+    - nolintlint
+    - perfsprint
+    - predeclared
+    - revive
+    - sloglint
+    - staticcheck
+    - thelper
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - usetesting
+    - wastedassign
+
+  settings:
+    depguard:
+      rules:
+        superseded:
+          list-mode: lax
+          deny:
+            - pkg: "io/ioutil"
+              desc: "use io and os"
+            - pkg: "math/rand$"
+              desc: "use math/rand/v2"
+            - pkg: "log$"
+              desc: "use log/slog"
+            - pkg: "github.com/pkg/errors"
+              desc: "use the standard errors package and fmt.Errorf with %w"
+            - pkg: "golang.org/x/exp/slices"
+              desc: "use the standard slices package"
+            - pkg: "golang.org/x/exp/maps"
+              desc: "use the standard maps package"
+            - pkg: "github.com/sirupsen/logrus"
+              desc: "use log/slog"
+            - pkg: "go.uber.org/zap"
+              desc: "use log/slog"
+            - pkg: "github.com/rs/zerolog"
+              desc: "use log/slog"
+        testing:
+          list-mode: lax
+          deny:
+            - pkg: "github.com/stretchr/testify"
+              desc: "use the testing package and github.com/google/go-cmp/cmp"
+            - pkg: "gotest.tools"
+              desc: "use the testing package and github.com/google/go-cmp/cmp"
+            - pkg: "github.com/onsi/gomega"
+              desc: "use the testing package and github.com/google/go-cmp/cmp"
+            - pkg: "github.com/onsi/ginkgo"
+              desc: "use the testing package with table-driven subtests"
+            - pkg: "github.com/golang/mock"
+              desc: "write a small fake by hand"
+            - pkg: "go.uber.org/mock"
+              desc: "write a small fake by hand"
+            - pkg: "github.com/vektra/mockery"
+              desc: "write a small fake by hand"
+
+    gocritic:
+      enabled-checks:
+        - commentedOutCode
+
+    ireturn:
+      allow:
+        - anon
+        - error
+        - empty
+        - stdlib
+        - generic
+
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+
+    revive:
+      rules:
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: early-return
+        - name: error-return
+        - name: exported
+        - name: indent-error-flow
+        - name: package-comments
+        - name: receiver-naming
+        - name: superfluous-else
+        - name: unexported-return
+        - name: blank-imports
+        - name: error-strings
+        - name: errorf
+        - name: increment-decrement
+        - name: range
+        - name: redefines-builtin-id
+        - name: time-naming
+        - name: var-declaration
+        - name: var-naming
+
+    sloglint:
+      context: scope
+
+    staticcheck:
+      checks:
+        - all
+        - -ST1000
+        - -ST1020
+        - -ST1021
+        - -ST1022
+
+  exclusions:
+    generated: lax
+    rules:
+      - path: _test\.go
+        linters:
+          - err113
+          - gochecknoglobals

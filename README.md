@@ -383,6 +383,22 @@ Keys that join tokens with a double underscore are exempt outright — `ThinkLPN
 
 Members of `interface`/`type` declarations are not checked, for the same reason: they routinely mirror an API response shape.
 
+## Go
+
+Go projects get the same two tiers as golangci-lint v2 configs in [`go/`](go/): [`go-no-go.golangci.yml`](go/go-no-go.golangci.yml), the blocking gate, and [`recommended.golangci.yml`](go/recommended.golangci.yml), its superset. They select the linters the flight-rules Go coding charter names in its review tiers. They are not part of the npm package.
+
+golangci-lint has no config inheritance, so copy a preset to `.golangci.yml` at the root of your module, pinned to a release tag:
+
+```sh
+curl -fsSL -o .golangci.yml \
+  https://raw.githubusercontent.com/Good-Ground-Collective/preflight/<tag>/go/go-no-go.golangci.yml
+golangci-lint run ./...
+```
+
+Change the copy freely: a linter you remove or exclude is a deliberate waiver, and the reviewer treats it that way. Run `go fix ./...` alongside the linter; it applies the rewrites `modernize` reports.
+
+`go/testdata/` holds an idiomatic module that must lint clean under both presets and a sloppy one that must trip each linter the presets rely on. CI runs `go/testdata/check-presets.sh` against both.
+
 ## Registry auth
 
 GitHub Packages requires a token to install. Add these two lines to `.npmrc` — both are safe to commit, since `${GITHUB_TOKEN}` is an env-var reference that npm expands at read time, not your actual token:

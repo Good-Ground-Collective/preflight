@@ -21,3 +21,17 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+
+  go-presets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go/testdata/good/go.mod
+          cache-dependency-path: go/testdata/good/go.sum
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.15.0
+          install-only: true
+      - run: go/testdata/check-presets.sh
